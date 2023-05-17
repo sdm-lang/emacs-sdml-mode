@@ -3,6 +3,7 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: lint
 ;; Version: 0.1.0
+;; Package-Requires: ((emacs "28.2") (flycheck "32") (tree-sitter "0.18.0") (tsc "0.18.0") (dash "2.9.1"))
 
 ;;; License:
 
@@ -28,52 +29,112 @@
 
 ;;; Commentary:
 
-;; Complete description goes here.
+;; This package provides a back-end for Flycheck that uses tree-sitter queries to
+;; select model elements with issues.
+
+;; Install
+;;
+;; `(use-package flycheck-sdml
+;;    :ensure t
+;;    :config (flycheck-sdml-setup))'
+;;
+
+;; Usage
+;;
+;; To enable, simply ensure Flycheck mode is enabled for your buffer.
+;;
+;; Rather than manually, you can enable this by setting `flycheck-mode' for
+;; all SDML files.
+;;
+;; `(use-package flycheck-sdml
+;;    :ensure t
+;;    :hook (sdml-mode . flycheck-mode)
+;;    :config (flycheck-sdml-setup))'
+
+;; Customization
+;;
+;; Lint rules are defined in the custom variable `sdml-lint-rules' with the form:
+;;
+;; `(rule-id "Issue message" level "tree-sitter query")'
+;;
+
 
 ;;; Code:
 
 (require 'flycheck)
 (require 'tree-sitter)
-(require 'tsc) ;; 0.18.0
+(require 'tsc)
 (require 'dash)
 
 ;; --------------------------------------------------------------------------
 ;; Customization
 ;; --------------------------------------------------------------------------
 
+(makunbound 'sdml-lint-rules)
+(unintern 'sdml-lint-rules)
+
 (defcustom sdml-lint-rules
   `((module-name-case
      "Module names may not start with upper-case"
      warning
      "((module name: (identifier) @name) (#match? @name \"^[A-Z]\"))")
+    ;; ----------------------------------------------------------------------
     (type-name-case
      "Type names may not start with lower-case"
      warning
-     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name "^[a-z]"))")
+     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[a-z]\"))")
+    ;; ----------------------------------------------------------------------
     (annotation-string-no-language
      "Annotation strings should always include a language identifier"
      warning
      ,(concat "(annotation value: (value (string !language) @string))"
               "(annotation value: (value (list_of_values (string !language) @string)))"))
+    ;; ----------------------------------------------------------------------
+    (annotation-string-empty
+     "Did you mean to use an empty annotation string value?"
+     warning
+     ,(concat "((annotation value: (value (string) @value)) (#eq? @value \"\\\"\\\"\"))"
+              "((annotation value: (value (list_of_values (string) @value))) (#eq? @value \"\\\"\\\"\"))"))
+    ;; ----------------------------------------------------------------------
     (entity-no-identity
      "Entities should include an identifying member"
      warning
      "(entity_def !identity) @entity")
+    ;; ----------------------------------------------------------------------
     (types-missing-bodies
      "Incomplete type definition"
      info
-     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @type"))
+     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @type")
+    ;; ----------------------------------------------------------------------
+    (member-by-value-target-cardinality
+     "By-value member cardinality is the default and may be removed"
+     info
+     "((member_by_value targetCardinality: (cardinality_expression) @card) (#eq? @card \"{1..}\"))")
+    ;; ----------------------------------------------------------------------
+    (member-by-ref-source-cardinality
+     "By-reference member source cardinality is the default and may be removed"
+     info
+     "((member_by_reference sourceCardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))")
+    ;; ----------------------------------------------------------------------
+    (member-by-ref-target-cardinality
+     "By-reference member target cardinality is the default and may be removed"
+     info
+     "((member_by_reference targetCardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))"))
   "SDML lint rules for Flycheck, these use tree-sitter queries to select issues."
   :tag "Lint rules for Flycheck."
-  :type '(repeat (list (symbol :tag "Rule Name")
+  :type '(repeat (list (symbol :tag "Identifier")
                        (string :tag "Message")
-                       (choice (const :tag "Error" error)
+                       (choice :tag "Level"
+                               (const :tag "Error" error)
                                (const :tag "Warning" warning)
                                (const :tag "Informational" info)
-                               (const :tag "Ignore" nil)
-                               :tag "Lint Level")
+                               (const :tag "Ignore" nil))
                        (string :tag "Match Query")))
   :group 'sdml)
+
+;; string with no language for current locale:
+;; (format "^@%s\(-%s\)?]" locale-language locale-country)
+;; ((annotation value: (value (string (language_tag) @value))) (#match? @value "^@en"))
 
 ;; --------------------------------------------------------------------------
 ;; Actual checker
@@ -102,6 +163,7 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
         (err-message (nth 1 rule))
         (lint-level (nth 2 rule))
         (patterns (nth 3 rule)))
+    (message "rule: %s" patterns)
     (tsc--without-restriction
       (when-let*
           ((query
@@ -110,15 +172,17 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
               ((tsc-query-invalid-node-type
                 tsc-query-invalid-field
                 tsc-query-invalid-capture)
-               (tree-sitter--echo "%s: %s" (get (car err) 'error-message) (cadr err))
+               (message "%s: %s" (get (car err) 'error-message) (cadr err))
                nil)
               (tsc-query-invalid
-               (tree-sitter--echo "%s" (get (car err) 'error-message))
+               (message "%s" (get (car err) 'error-message))
                nil)))
            (root-node (tsc-root-node tree-sitter-tree))
            (captures (tsc-query-captures query root-node #'tsc--buffer-substring-no-properties)))
         (if (= (length captures) 0)
-            (tree-sitter--echo "No captures found")
+            (progn
+              (message "No captures found in query %s [%s]" patterns rule-name)
+              '())
           (mapcar (lambda (cap) (flycheck-sdml--make-error rule-name err-message lint-level cap)) captures))))))
 
 ;; --------------------------------------------------------------------------
@@ -136,7 +200,6 @@ CHECKER is this checker, and CALLBACK is the flycheck dispatch function."
                                       (and (not (equal (nth 1 rule) 'nil))
                                            (not (string= (nth 2 rule) ""))))
                                     sdml-lint-rules)))))
-    (message "finished: %s" (pp results))
     (funcall callback 'finished results)))
 
 

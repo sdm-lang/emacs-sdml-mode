@@ -2,7 +2,7 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: language
-;; Version: 0.1.0
+;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3") (ts-fold "0.1.0"))
 ;;
 ;;; License:
@@ -44,7 +44,22 @@
 ;; Once installed the major mode should be used for any file ending in `.sdm'
 ;; or `.sdml' with highlighting and indentation support.
 
+;; Debug
+;;
+;; `\\[tree-sitter-debug-mode]' -- open tree-sitter debug view
+;; `\\[tree-sitter-query-builder]' -- open tree-sitter query builder
+
 ;; Folding
+;;
+;; `\\[ts-fold-close]' -- fold item
+;; `\\[ts-fold-open]' -- unfold item
+;; `\\[ts-fold-close-all]' -- fold all items in buffer
+;; `\\[ts-fold-open-all]' -- unfold all items in buffer
+;; `\\[ts-fold-open-recursively]' -- unfold item and all children
+;; `\\[ts-fold-toggle]' -- toggle fold/unfold state
+;;
+
+;; Fold Indicators
 ;;
 ;; To switch to left/right fringe: (Default is left-fringe)
 ;;
@@ -55,25 +70,16 @@
 ;; `(setq ts-fold-indicators-priority 30)'
 ;;
 
-;; Dependencies:
-;;
-;; This package depends upon the following packages:
-;;
-;; - `tree-sitter' the core parser support.
-;; - `tree-sitter-hl' font-lock highlighting based on `tree-sitter'.
-;; - `tree-sitter-indent' indentation support based on `tree-sitter'.
-;; - `ts-fold' code folding built on `tree-sitter'.
-
 ;;; Code:
 
 (eval-when-compile
   (require 'rx)) ;; built-in
 
 (require 'tree-sitter)
-(require 'tree-sitter-hl)
+(require 'tree-sitter-hl) ;; included in above
 (require 'tree-sitter-indent)
 (require 'ts-fold)
-(require 'ts-fold-indicators)
+(require 'ts-fold-indicators) ;; included in above
 
 
 ;; --------------------------------------------------------------------------
@@ -116,6 +122,16 @@
 
 
 ;; --------------------------------------------------------------------------
+;; Syntax
+;; --------------------------------------------------------------------------
+
+(defvar sdml-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?- ". 12b" table)
+    table))
+
+
+;; --------------------------------------------------------------------------
 ;; Highlighting
 ;; --------------------------------------------------------------------------
 
@@ -151,11 +167,9 @@
 
    ;; Annotations
    (annotation
-    "@" @label)
-   (annotation
-     name: (identifier_reference) @label)
-   ;;(annotation
-   ;; target: (identifier_reference) @type)
+    "@" @label
+    name: (identifier_reference) @label
+    "=" @operator)
 
    ;; Types
    (entity_def
@@ -173,20 +187,26 @@
 
    (data_type_def
     name: (identifier) @type
+    "<-" @operator
     base: (identifier_reference) @type)
 
    ;; Members
    (identity_member
     name: (identifier) @variable
+   "->" @operator
     target: (identifier_reference) @type)
 
    (member_by_value
     name: (identifier) @variable
+    "->" @operator
     target: (identifier_reference) @type)
 
    (member_by_reference
     name: (identifier) @variable
+    "->" @operator
     target: (identifier_reference) @type)
+
+   (cardinality_expression ".." @operator)
 
    ;; Values
    (quoted_string) @string
@@ -318,6 +338,10 @@ Key bindings:
 
   :group 'sdml
 
+  :syntax-table sdml-syntax-table
+
+  :abbrev-table nil
+
   ;; Setup
   (sdml--load-language)
 
@@ -334,9 +358,13 @@ Key bindings:
   (setq prettify-symbols-alist sdml-prettify-symbols-alist)
   (prettify-symbols-mode)
 
-  ;; Core tree-sitter capabilities
-  (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
+  ;; tree-sitter debug and query
+  (setq-local tree-sitter-debug-jump-buttons t)
+  (setq-local tree-sitter-debug-highlight-jump-region t)
   (tree-sitter-mode)
+
+  ;; tree-sitter highlighting capabilities
+  (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
   (tree-sitter-hl-mode)
   (tree-sitter-indent-mode)
 

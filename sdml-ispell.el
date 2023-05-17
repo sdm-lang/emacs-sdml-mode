@@ -2,8 +2,8 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: sdml spelling
-;; Version: 0.1.0
-;; Package-Requires: ((emacs "28.2") (tree-sitter-ispell "0.1.0") (sdml-mode "0.1.0"))
+;; Version: 0.1.3
+;; Package-Requires: ((emacs "28.2") (sdml-mode "0.1.3") (tree-sitter-ispell "0.1.0"))
 
 ;;; License:
 
@@ -29,13 +29,23 @@
 
 ;;; Commentary:
 
-;; Complete description goes here.
+;; This package enables spell checking, with ispell, for elements of the buffer
+;; that represent content. Currently this selects only string values and comments
+;; for checking.
+;;
 
+;; Install
 ;;
-;; This package depends upon the following packages:
+;; `(use-package sdml-ispell
+;;    :ensure t
+;;    :config (sdml-ispell-setup))'
 ;;
-;; - `sdml-mode' :: the core parser support.
-;; - `tree-sitter-ispell' :: spell checking for text content.
+
+;; Usage
+;;
+;; `\\[tree-sitter-ispell-run-at-point]' -- spell check the element at point.
+;; `\\[tree-sitter-ispell-run-buffer]' -- spell check all elements in the buffer.
+;;
 
 ;;; Code:
 
