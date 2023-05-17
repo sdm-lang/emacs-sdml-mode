@@ -36,7 +36,9 @@
 ;;
 ;; Installing
 ;;
-;; `(use-package sdml-mode :ensure t)'
+;; `(use-package sdml-mode
+;;    :ensure t
+;;    :config (sdml-mode-setup))'
 
 ;;
 ;; Usage
@@ -315,16 +317,21 @@
 ;; Mode Definition
 ;; --------------------------------------------------------------------------
 
-(defun sdml--load-language ()
-  "Load and connect the parser library.
-Load the dynamic library, this should be named `sdml.dylib' or `sdml.so',
-and associate it with the major mode."
-  ;; Load the dynamic library from the search path.
-  (tree-sitter-load 'sdml)
+(defun sdml-mode-setup (&optional dylib-file)
+  "Load and connect the parser dynamic library.
 
-  ;; Connect the major mode to the loaded library.
-  (add-to-list 'tree-sitter-major-mode-language-alist
-               '(sdml-mode . sdml)))
+Load the dynamic library, either with the explicit path
+in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
+The parser library will be named  `sdml' with a
+platform-specific extension in `tree-sitter-load-suffixes'."
+  (unless (assoc 'sdml tree-sitter-languages)
+    ;; Load the dynamic library from the search path.
+    (tree-sitter-load 'sdml dylib-file))
+
+  (unless (assoc 'sdml-mode tree-sitter-major-mode-language-alist)
+    ;; Connect the major mode to the loaded library.
+    (add-to-list 'tree-sitter-major-mode-language-alist
+                 '(sdml-mode . sdml))))
 
 ;;;###autoload
 (define-derived-mode
@@ -341,9 +348,6 @@ Key bindings:
   :syntax-table sdml-syntax-table
 
   :abbrev-table nil
-
-  ;; Setup
-  (sdml--load-language)
 
   ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
