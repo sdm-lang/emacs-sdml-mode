@@ -42,28 +42,29 @@
 ;; --------------------------------------------------------------------------
 
 (defcustom sdml-lint-rules
-  '((module-name-case
+  `((module-name-case
+     "Module names may not start with upper-case"
      warning
      "((module name: (identifier) @name) (#match? @name \"^[A-Z]\"))")
     (type-name-case
+     "Type names may not start with lower-case"
      warning
-     "")
-    (data-type-name-case
-     warning
-     "")
+     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name "^[a-z]"))")
     (annotation-string-no-language
+     "Annotation strings should always include a language identifier"
      warning
-     (concat "(annotation value: (value (string !language) @string))"
-             "(annotation value: (value (list_of_values (string !language) @string)))"))
+     ,(concat "(annotation value: (value (string !language) @string))"
+              "(annotation value: (value (list_of_values (string !language) @string)))"))
     (entity-no-identity
+     "Entities should include an identifying member"
      warning
      "(entity_def !identity) @entity")
     (types-missing-bodies
+     "Incomplete type definition"
      info
-     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @entity")
-    )
-  "Lint rules for SDML source."
-  :tag "Lint rules"
+     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @type"))
+  "SDML lint rules for Flycheck, these use tree-sitter queries to select issues."
+  :tag "Lint rules for Flycheck."
   :type '(repeat (list (symbol :tag "Rule Name")
                        (string :tag "Message")
                        (choice (const :tag "Error" error)
@@ -73,30 +74,6 @@
                                :tag "Lint Level")
                        (string :tag "Match Query")))
   :group 'sdml)
-
-(setq sdml-lint-rules
-      `((module-name-case
-         "Module names may not start with upper-case"
-         warning
-         "((module name: (identifier) @name) (#match? @name \"^[A-Z]\"))")
-        (type-name-case
-         "Type names may not start with lower-case"
-         warning
-         "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name "^[a-z]"))")
-        (annotation-string-no-language
-         "Annotation strings should always include a language identifier"
-         warning
-         ,(concat "(annotation value: (value (string !language) @string))"
-                  "(annotation value: (value (list_of_values (string !language) @string)))"))
-        (entity-no-identity
-         "Entities should include an identifying member"
-         warning
-         "(entity_def !identity) @entity")
-        (types-missing-bodies
-         "Incomplete type definition"
-         info
-         "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @type")
-        ))
 
 ;; --------------------------------------------------------------------------
 ;; Actual checker

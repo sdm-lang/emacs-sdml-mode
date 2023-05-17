@@ -260,18 +260,18 @@
 ;; Folding
 ;; --------------------------------------------------------------------------
 
-
 (defconst sdml-mode-folding-definitions
-  '((data_type_def . ts-fold-range-seq)
+  '((data_type_def . (ts-fold-range-seq 7 2))
     (entity_def . (ts-fold-range-seq 5 2))
-    (enum_def . ts-fold-range-seq)
-    (event_def . ts-fold-range-seq)
+    (enum_def . (ts-fold-range-seq 3 2))
+    (event_def . (ts-fold-range-seq 4 2))
     (entity_body . (ts-fold-range-seq 1 -2))
     (structure_body . (ts-fold-range-seq 1 -2))
     (enum_body . (ts-fold-range-seq 1 -2))
     (annotation_only_body . (ts-fold-range-seq 1 -2))
     (list_of_values . ts-fold-range-seq)
     (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;")))))
+
 
 ;; --------------------------------------------------------------------------
 ;; Key Bindings
