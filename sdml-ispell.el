@@ -54,17 +54,30 @@
   :group 'sdml)
 
 ;; --------------------------------------------------------------------------
+;; Key Bindings
+;; --------------------------------------------------------------------------
+
+(defvar sdml-ispell-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-s s") 'tree-sitter-ispell-run-at-point)
+    (define-key map (kbd "C-c C-s C-s") 'tree-sitter-ispell-run-buffer)
+    map)
+  "Keymap for SDML ispell major mode.")
+
+;; --------------------------------------------------------------------------
 ;; Mode Definition
 ;; --------------------------------------------------------------------------
 
 ;;;###autoload
 (define-minor-mode
   sdml-ispell-mode
-  "Minor mode to allow ispell checking in SDML text content."
+  "Minor mode to allow ispell checking in SDML text content.
+
+Key bindings:
+\\{sdml-ispell-mode-map}"
   :group 'sdml
   :tag "Enable SDML ispell minor mode"
-  :keymap '(([C-c C-s s] . tree-sitter-ispell-run-at-point)
-            ([C-c C-s C-s] . tree-sitter-ispell-run-buffer))
+  
   ;; How do we "disable" this?
   (when sdml-ispell-mode
     (tree-sitter-ispell-run-buffer)))

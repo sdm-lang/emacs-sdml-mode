@@ -3,7 +3,7 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: language
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
+;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3") (ts-fold "0.1.0"))
 ;;
 ;;; License:
 
@@ -36,8 +36,6 @@
 ;;
 ;; Installing
 ;;
-;; The package does declare it's dependencies and so the only 
-;;
 ;; `(use-package sdml-mode :ensure t)'
 
 ;;
@@ -46,21 +44,37 @@
 ;; Once installed the major mode should be used for any file ending in `.sdm'
 ;; or `.sdml' with highlighting and indentation support.
 
+;; Folding
+;;
+;; To switch to left/right fringe: (Default is left-fringe)
+;;
+;; `(setq ts-fold-indicators-fringe 'right-fringe)'
+;;
+;; To lower/higher the fringe overlay's priority: (Default is 30)
+;;
+;; `(setq ts-fold-indicators-priority 30)'
+;;
+
+;; Dependencies:
 ;;
 ;; This package depends upon the following packages:
 ;;
-;; - `tree-sitter' :: the core parser support.
-;; - `tree-sitter-hl' :: font-lock highlighting based on `tree-sitter'.
-;; - `tree-sitter-indent' :: indentation support based on `tree-sitter'.
+;; - `tree-sitter' the core parser support.
+;; - `tree-sitter-hl' font-lock highlighting based on `tree-sitter'.
+;; - `tree-sitter-indent' indentation support based on `tree-sitter'.
+;; - `ts-fold' code folding built on `tree-sitter'.
 
 ;;; Code:
 
 (eval-when-compile
-  (require 'rx))
+  (require 'rx)) ;; built-in
 
 (require 'tree-sitter)
 (require 'tree-sitter-hl)
 (require 'tree-sitter-indent)
+(require 'ts-fold)
+(require 'ts-fold-indicators)
+
 
 ;; --------------------------------------------------------------------------
 ;; Customization
@@ -78,11 +92,6 @@
   :type 'natnum
   :group 'sdml)
 
-
-;; --------------------------------------------------------------------------
-;; Prettify
-;; --------------------------------------------------------------------------
-
 (defcustom sdml-prettify-symbols-alist
   '(("->" . ?→) ("<-" . ?←))
   "An alist of symbol prettifications used for `prettify-symbols-alist'."
@@ -92,7 +101,7 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Highlighting
+;; Additional Faces
 ;; --------------------------------------------------------------------------
 
 (defface tree-sitter-hl-face:type.scope
@@ -104,6 +113,11 @@
 ;; - tree-sitter-hl-face-mapping-function
 ;; - tree-sitter-hl-add-patterns
 ;; - tree-sitter-hl-default-patterns
+
+
+;; --------------------------------------------------------------------------
+;; Highlighting
+;; --------------------------------------------------------------------------
 
 (defconst sdml-mode-tree-sitter-hl-patterns
   [
@@ -243,12 +257,39 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Key Mapping
+;; Folding
 ;; --------------------------------------------------------------------------
 
-;; 
-;; tree-sitter-debug-mode
-;; tree-sitter-query-builder
+
+(defconst sdml-mode-folding-definitions
+  '((data_type_def . ts-fold-range-seq)
+    (entity_def . (ts-fold-range-seq 5 2))
+    (enum_def . ts-fold-range-seq)
+    (event_def . ts-fold-range-seq)
+    (entity_body . (ts-fold-range-seq 1 -2))
+    (structure_body . (ts-fold-range-seq 1 -2))
+    (enum_body . (ts-fold-range-seq 1 -2))
+    (annotation_only_body . (ts-fold-range-seq 1 -2))
+    (list_of_values . ts-fold-range-seq)
+    (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;")))))
+
+;; --------------------------------------------------------------------------
+;; Key Bindings
+;; --------------------------------------------------------------------------
+
+(defvar sdml-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-s d") 'tree-sitter-debug-mode)
+    (define-key map (kbd "C-c C-s q") 'tree-sitter-query-builder)
+    (define-key map (kbd "C-c C-s -") 'ts-fold-close)
+    (define-key map (kbd "C-c C-s +") 'ts-fold-open)
+    (define-key map (kbd "C-c C-s C--") 'ts-fold-close-all)
+    (define-key map (kbd "C-c C-s C-+") 'ts-fold-open-all)
+    (define-key map (kbd "C-c C-s /") 'ts-fold-open-recursively)
+    (define-key map (kbd "C-c C-s .") 'ts-fold-toggle)
+    map)
+  "Keymap for SDML major mode.")
+
 
 ;; --------------------------------------------------------------------------
 ;; Mode Definition
@@ -270,25 +311,43 @@ and associate it with the major mode."
   sdml-mode
   prog-mode
   "SDML"
-  "Major mode for editing SDML files."
+  "Major mode for editing SDML files.
+
+Key bindings:
+\\{sdml-mode-map}"
 
   :group 'sdml
 
+  ;; Setup
   (sdml--load-language)
 
+  ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
     (setq font-lock-defaults '(nil)))
-  (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
 
+  ;; Comment handling
   (setq-local comment-start "; ")
   (setq-local comment-end "")
   (setq-local comment-multi-line t)
 
+  ;; Prettify (prettify-symbols-mode)
   (setq prettify-symbols-alist sdml-prettify-symbols-alist)
+  (prettify-symbols-mode)
 
+  ;; Core tree-sitter capabilities
+  (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
   (tree-sitter-mode)
   (tree-sitter-hl-mode)
-  (tree-sitter-indent-mode))
+  (tree-sitter-indent-mode)
+
+  ;; Additional tree-sitter capabilities
+  (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
+  (ts-fold-mode)
+
+  ;; ts-fold plugins:
+  (when (and window-system (featurep ts-fold-indicators))
+    (ts-fold-indicators-mode))
+  (ts-fold-line-comment-mode))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-mode))
