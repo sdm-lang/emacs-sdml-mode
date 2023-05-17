@@ -84,7 +84,7 @@ enabled by default with `window-system` is non-nil.
 
 ## Ispell
 
-The additional package `sdml-ispell` ...
+The additional package `sdml-ispell` provides *selective* spell checking by only checking selected nodes in the tree.
 
 ```elisp
 (use-package sdml-ispell
