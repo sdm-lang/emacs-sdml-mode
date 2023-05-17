@@ -2,8 +2,8 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: language
-;; Version: 0.0.1
-;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3") (tree-sitter-ispell "0.1.0"))
+;; Version: 0.1.0
+;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;;
 ;;; License:
 
@@ -36,6 +36,8 @@
 ;;
 ;; Installing
 ;;
+;; The package does declare it's dependencies and so the only 
+;;
 ;; `(use-package sdml-mode :ensure t)'
 
 ;;
@@ -50,7 +52,6 @@
 ;; - `tree-sitter' :: the core parser support.
 ;; - `tree-sitter-hl' :: font-lock highlighting based on `tree-sitter'.
 ;; - `tree-sitter-indent' :: indentation support based on `tree-sitter'.
-;; - `tree-sitter-ispell' :: spell checking for text content.
 
 ;;; Code:
 
@@ -60,28 +61,22 @@
 (require 'tree-sitter)
 (require 'tree-sitter-hl)
 (require 'tree-sitter-indent)
-(require 'tree-sitter-ispell)
 
 ;; --------------------------------------------------------------------------
 ;; Customization
 ;; --------------------------------------------------------------------------
 
-(defgroup sdml-mode nil
+(defgroup sdml nil
   "SDML language support."
-  :tag "sdml"
+  :tag "SDML"
   :prefix "sdml-"
   :group 'languages)
 
 (defcustom sdml-indent-offset 2
-  "Number of spaces for each indentation step"
+  "Number of spaces for each indentation step."
+  :tag "Indentation number of spaces"
   :type 'natnum
-  :group 'sdml-mode)
-
-(defcustom sdml-auto-indent-flag t
-  "If non-nil indent current line when certain words or
-  characters are inserted."
-  :type 'boolean
-  :group 'sdml-mode)
+  :group 'sdml)
 
 
 ;; --------------------------------------------------------------------------
@@ -91,8 +86,9 @@
 (defcustom sdml-prettify-symbols-alist
   '(("->" . ?→) ("<-" . ?←))
   "An alist of symbol prettifications used for `prettify-symbols-alist'."
+  :tag "Symbol mapping for prettify"
   :type '(repeat (cons string character))
-  :group 'sdml-mode)
+  :group 'sdml)
 
 
 ;; --------------------------------------------------------------------------
@@ -213,7 +209,7 @@
 ;; Indentation
 ;; --------------------------------------------------------------------------
 
-(defcustom tree-sitter-indent-sdml-scopes
+(defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
     (indent-all . ())
 
@@ -243,39 +239,26 @@
     (multi-line-text . (quoted_string))
 
     ;; These nodes always outdent (1 shift in opposite direction)
-    (outdent . ()))
-  "Scopes for indenting in SDML."
-  :type 'sexp
-  :group 'sdml-mode)
-
-
-;; --------------------------------------------------------------------------
-;; Spelling
-;; --------------------------------------------------------------------------
-
-(defcustom tree-sitter-ispell-sdml-text-mapping
-  '(quoted_string comment)
-  "Nodes to be spell checked in SDML."
-  :type '(repeat symbol)
-  :group 'sdml-mode)
+    (outdent . ())))
 
 
 ;; --------------------------------------------------------------------------
 ;; Key Mapping
 ;; --------------------------------------------------------------------------
 
-;; tree-sitter-ispell-run-buffer
+;; 
 ;; tree-sitter-debug-mode
 ;; tree-sitter-query-builder
 
 ;; --------------------------------------------------------------------------
-;; Mode
+;; Mode Definition
 ;; --------------------------------------------------------------------------
 
 (defun sdml--load-language ()
   "Load and connect the parser library.
 Load the dynamic library, this should be named `sdml.dylib' or `sdml.so',
 and associate it with the major mode."
+  ;; Load the dynamic library from the search path.
   (tree-sitter-load 'sdml)
 
   ;; Connect the major mode to the loaded library.
@@ -289,7 +272,7 @@ and associate it with the major mode."
   "SDML"
   "Major mode for editing SDML files."
 
-  :group 'sdml-mode
+  :group 'sdml
 
   (sdml--load-language)
 
@@ -302,9 +285,6 @@ and associate it with the major mode."
   (setq-local comment-multi-line t)
 
   (setq prettify-symbols-alist sdml-prettify-symbols-alist)
-
-  (add-to-list 'tree-sitter-ispell-grammar-text-mapping
-               `(sdml-mode . ,tree-sitter-ispell-sdml-text-mapping))
 
   (tree-sitter-mode)
   (tree-sitter-hl-mode)

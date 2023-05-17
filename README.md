@@ -20,7 +20,7 @@ or `.sdml` with highlighting and indentation support.
 
 This package depends upon the following:
 
-- `tree-sitter` :: the core parser support.
-- `tree-sitter-hl` :: font-lock highlighting using `tree-sitter` queries.
-- `tree-sitter-indent` :: indentation support  using `tree-sitter` queries.
-- `tree-sitter-ispell` :: spell chqecking for text content using `tree-sitter` queries.
+- `tree-sitter` the core parser support.
+- `tree-sitter-hl` font-lock highlighting using `tree-sitter` queries.
+- `tree-sitter-indent` indentation support  using `tree-sitter` queries.
+- `tree-sitter-ispell` spell checking for text content using `tree-sitter` queries.
