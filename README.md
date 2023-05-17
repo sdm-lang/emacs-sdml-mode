@@ -1,7 +1,7 @@
 # Emacs SDML Mode
 
 This package provides an Emacs tree-sitter based major mode for SDML - the
-[https://github.com/johnstonskj/tree-sitter-sdml](Simple Domain Modeling Language).
+[Simple Domain Modeling Language](https://github.com/johnstonskj/tree-sitter-sdml).
 
 
 # Installing
@@ -36,7 +36,7 @@ Build just the parser dynamic library, but importantly you need to select a spec
 
 Finally copy the dynamic library to a location in the path specified by the Emacs variable `tree-sitter-load-path`.
 
-```base
+```bash
 > cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
 ```
 
@@ -50,10 +50,15 @@ support.
 Syntax highlighting is provided by the `tree-sitter-hl-mode` minor mode based on the configuration in the constant
 `sdml-mode-tree-sitter-hl-patterns`.
 
+The `sdml-mode` also adds to the `prettify-symbols-alist` list, the set of symbols is in the custom variable
+`sdml-prettify-symbols-alist`.
+
 ## Indentation
 
 Line indentation is provided by the `tree-sitter-indent-mode` minor mode based on the configuration in the constant
 `sdml-mode-folding-definitions`.
+
+Default indentation is two spaces, although this can be overridden by the custom variable `sdml-indent-offset`.
 
 ## Code Folding
 
@@ -73,4 +78,47 @@ enabled by default with `window-system` is non-nil.
 ## Debugging
 
 * `C-c C-s d` -- open the tree-sitter debug view
-* `C-c C-s q -- open the tree-sitter query builder
+* `C-c C-s q` -- open the tree-sitter query builder
+
+# Add-Ons
+
+## Ispell
+
+The additional package `sdml-ispell` ...
+
+```elisp
+(use-package sdml-ispell
+  :after sdml-mode
+  :load-path "/path/to/repo"
+  :config (sdml-ispell-setup))
+```
+
+* `C-c C-s s` -- spell check the item at point
+* `C-c C-s C-s` -- spell check all items in the buffer
+
+By default only strings and comments are checked, although this can be overridden by the custom variable
+`tree-sitter-ispell-sdml-text-mapping`.
+
+## Flycheck
+
+The additional package `flycheck-sdml` provides on-the-fly linting for SDML buffers.
+
+```elisp
+(use-package flycheck-sdml
+  :after (flycheck sdml-mode)
+  :load-path "/path/to/repo"
+  :config (flycheck-sdml-setup))
+```
+
+To enable, simply ensure Flycheck mode is enabled for your buffer. Rather than per-buffer, you can enable this by
+setting `flycheck-mode' for all SDML files with a hook.
+
+```elisp
+(use-package flycheck-sdml
+  :after (flycheck sdml-mode)
+  :load-path "/path/to/repo"
+  :hook (sdml-mode . flycheck-mode)
+  :config (flycheck-sdml-setup))
+```
+
+The entire set of lint rules are stored in the custom variable `sdml-lint-rules`.
