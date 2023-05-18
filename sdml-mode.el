@@ -143,19 +143,19 @@
    (line_comment) @comment
 
    [
-    "module"
-    "is"
-    "import"
-    "identity"
-    "ref"
-    "entity"
-    "structure"
-    "event"
-    "source"
-    "structure"
-    "enum"
     "datatype"
     "end"
+    "entity"
+    "enum"
+    "event"
+    "group"
+    "identity"
+    "import"
+    "is"
+    "module"
+    "ref"
+    "source"
+    "structure"
     ] @keyword
 
    ;; Module & Imports
@@ -195,7 +195,7 @@
    ;; Members
    (identity_member
     name: (identifier) @variable
-   "->" @operator
+    "->" @operator
     target: (identifier_reference) @type)
 
    (member_by_value
@@ -211,23 +211,25 @@
    (cardinality_expression ".." @operator)
 
    ;; Values
-   (quoted_string) @string
+   (string
+    (quoted_string) @string
+    language: (language_tag) @property)
+
    (iri_reference) @string.special
-   (language_tag) @property
 
    [
-    (double)
     (decimal)
+    (double)
     (integer)
     (unsigned)
     ] @number
 
-    (boolean) @constant.builtin
+   (boolean) @constant.builtin
 
-    (value_constructor
+   (value_constructor
     name: (identifier_reference)) @function.special
 
-    ;; Punctuation
+   ;; Punctuation
    "(" @punctuation.bracket
    ")" @punctuation.bracket
    "[" @punctuation.bracket
@@ -258,7 +260,9 @@
                     structure_body
                     enum_body
                     annotation_only_body
-                    list_of_values))
+                    list_of_values
+                    entity_group
+                    structure_group))
 
     ;; If parent node is one of these → indent to paren opener
     (paren-indent . ())
@@ -291,6 +295,8 @@
     (structure_body . (ts-fold-range-seq 1 -2))
     (enum_body . (ts-fold-range-seq 1 -2))
     (annotation_only_body . (ts-fold-range-seq 1 -2))
+    (entity_group . (ts-fold-range-seq 4 -2))
+    (structure_group . (ts-fold-range-seq 4 -2))
     (list_of_values . ts-fold-range-seq)
     (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;")))))
 

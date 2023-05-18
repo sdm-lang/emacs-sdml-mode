@@ -3,7 +3,7 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Keywords: lint
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "28.2") (flycheck "32") (tree-sitter "0.18.0") (tsc "0.18.0") (dash "2.9.1"))
+;; Package-Requires: ((emacs "28.2") (flycheck "32") (tsc "0.18.0") (dash "2.9.1"))
 
 ;;; License:
 
@@ -62,7 +62,6 @@
 ;;; Code:
 
 (require 'flycheck)
-(require 'tree-sitter)
 (require 'tsc)
 (require 'dash)
 
@@ -70,8 +69,8 @@
 ;; Customization
 ;; --------------------------------------------------------------------------
 
-(makunbound 'sdml-lint-rules)
-(unintern 'sdml-lint-rules)
+;; (makunbound 'sdml-lint-rules)
+;; (unintern 'sdml-lint-rules)
 
 (defcustom sdml-lint-rules
   `((module-name-case
