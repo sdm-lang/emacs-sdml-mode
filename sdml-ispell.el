@@ -1,13 +1,14 @@
 ;;; sdml-ispell.el --- Spell check text content -*- lexical-binding: t; -*-
 
+;; Copyright (c) 2023 Simon Johnston
+
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Keywords: sdml spelling
 ;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (sdml-mode "0.1.3") (tree-sitter-ispell "0.1.0"))
 
-;;; License:
+;; Keywords: sdml spelling
 
-;; Copyright (c) 2023 Simon Johnston
+;;; License:
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal

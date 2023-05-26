@@ -1,12 +1,14 @@
 ;;; ob-sdml.el --- Org-Babel for SDML -*- lexical-binding: t; -*-
 
+;; Copyright (c) 2023 Simon Johnston
+
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Keywords:
-;; Version: 0.0.1
+;; Version: 0.1.3
+;; Package-Requires: ((emacs "28.2") (org "9.6.0"))
+
+;; Keywords: sdml
 
 ;;; License:
-
-;; Copyright (c) 2023 Simon Johnston
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal
@@ -33,15 +35,8 @@
 ;;; Code:
 
 (require 'org)
-
 (require 'ob)
 
-
-(defgroup ob-sdml nil
-  "Org Babel support."
-  :tag ""
-  :prefix "ob-sdml-"
-  :group 'org-babel)
 
 (defcustom ob-sdml-cmd "sdml"
   "Name of the command to use for processing SDML source.
@@ -79,7 +74,6 @@ parameters may be used, like sdml -v"
   "Execute a block of SDML code with org-babel.
 The code to process is in BODY, the block parameters are in PARAMS.
 This function is called by `org-babel-execute-src-block'."
-  (message "About to...")
   (let* ((out-file (cdr (or (assoc :file params)
 			                (error "You need to specify a :file parameter"))))
          (cmd (or (cdr (assoc :cmd params)) ob-sdml-cmd))
@@ -119,10 +113,7 @@ This function is called by `org-babel-execute-src-block'."
 
 (defun ob-sdml-unload ()
   "Remove all."
-  (dolist (sym '(org-babel-default-header-args:sdml-draw
-                 org-babel-expand-body:sdml-draw
-                 org-babel-execute:sdml-draw
-                 org-babel-prep-session:sdml-draw))
+  (dolist (sym '(ob-sdml-cmd))
     (makunbound sym)
     (unintern sym nil))
   (unload-feature 'ob-sdml))

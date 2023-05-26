@@ -111,7 +111,7 @@ The additional package `flycheck-sdml` provides on-the-fly linting for SDML buff
 ```
 
 To enable, simply ensure Flycheck mode is enabled for your buffer. Rather than per-buffer, you can enable this by
-setting `flycheck-mode' for all SDML files with a hook.
+setting `flycheck-mode` for all SDML files with a hook.
 
 ```elisp
 (use-package flycheck-sdml
@@ -122,3 +122,49 @@ setting `flycheck-mode' for all SDML files with a hook.
 ```
 
 The entire set of lint rules are stored in the custom variable `sdml-lint-rules`.
+
+## Org-Babel
+
+Org-Babel support provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
+produce diagrams and more. For example, the following source block calls the CLI to draw a concept diagram for the
+enclosed module.
+
+```
+#+NAME: lst:rentals-example
+#+CAPTION: Rentals Concepts
+#+BEGIN_SRC sdml :cmdline draw --diagram concepts :file ./rentals-concepts.svg :exports both
+module rentals is
+
+  entity Vehicle
+
+  entity Location
+
+  entity Customer
+
+  entity Booking
+
+end
+#+END_SRC
+```
+
+The results block then references the resulting image.
+
+```
+#+NAME: fig:rentals-example-concepts
+#+CAPTION: Rentals Concepts
+#+RESULTS: lst:rentals-example
+[[file:./rentals-concepts.svg]]
+
+```
+
+But, what if we want to produce more than one diagram from the same source? By using the built-in
+/[[https://orgmode.org/manual/Noweb-Reference-Syntax.html][noweb]]/ syntax we can create a new source block, but
+reference the original content. This source block has different command-line parameters and has it's own results block
+as well.
+
+```
+#+NAME: fig:rentals-example-erd
+#+BEGIN_SRC sdml :cmdline draw --diagram concepts :file ./rentals-erd.svg :exports results :noweb yes
+<<lst:rentals-example>>
+#+END_SRC
+```

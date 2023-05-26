@@ -1,13 +1,14 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
+;; Copyright (c) 2023 Simon Johnston
+
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Keywords: language
 ;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3") (ts-fold "0.1.0"))
-;;
-;;; License:
 
-;; Copyright (c) 2023 Simon Johnston
+;; Keywords: language
+
+;;; License:
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal
@@ -156,6 +157,7 @@
     "ref"
     "source"
     "structure"
+    (unknown_type)
     ] @keyword
 
    ;; Module & Imports
@@ -196,19 +198,19 @@
    (identity_member
     name: (identifier) @variable
     "->" @operator
-    target: (identifier_reference) @type)
+    target: (_) @type)
 
    (member_by_value
     name: (identifier) @variable
     "->" @operator
-    target: (identifier_reference) @type)
+    target: (_) @type)
 
    (member_by_reference
     name: (identifier) @variable
     "->" @operator
-    target: (identifier_reference) @type)
+    target: (_) @type)
 
-   (cardinality_expression ".." @operator)
+   (cardinality_range ".." @operator)
 
    ;; Values
    (string
@@ -320,16 +322,64 @@
 
 
 ;; --------------------------------------------------------------------------
+;; Abbrev Table
+;; --------------------------------------------------------------------------
+
+(define-skeleton sdml-mode--new-module
+  "New module." nil
+  > "module " _ " is" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-entity
+  "New entity." nil
+  > "entity " _ " is" \n
+  > "identity id -> unknown" \n
+  > "" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-structure
+  "New structure." nil
+  > "structure " _ " is" \n
+  > "" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-event
+  "New event." nil
+  > "event " _ " source Entity is" \n
+  > "" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-enum
+  "New enum." nil
+  > "enum " _ " is" \n
+  > "VariantOne = 1" \n
+  > "VariantTwo = 2" \n
+  > "end")
+
+(define-abbrev-table 'sdml-abbrev-table
+  '(("uk" "-> unknown")
+    ("mod" "" 'sdml-mode--new-module)
+    ("ent" "" 'sdml-mode--new-entity)
+    ("str" "" 'sdml-mode--new-structure)
+    ("evt" "" 'sdml-mode--new-event)
+    ("enu" "" 'sdml-mode--new-enum)
+    ("xs" "xsd:string")
+    ("xi" "xsd:integer")
+    ("xb" "xsd:boolean")
+    ("xu" "xsd:anyURI")
+    ))
+
+;; --------------------------------------------------------------------------
 ;; Mode Definition
 ;; --------------------------------------------------------------------------
 
 (defun sdml-mode-setup (&optional dylib-file)
   "Load and connect the parser dynamic library.
 
-Load the dynamic library, either with the explicit path
-in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
-The parser library will be named  `sdml' with a
-platform-specific extension in `tree-sitter-load-suffixes'."
+  Load the dynamic library, either with the explicit path
+  in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
+  The parser library will be named  `sdml' with a
+  platform-specific extension in `tree-sitter-load-suffixes'."
   (unless (assoc 'sdml tree-sitter-languages)
     ;; Load the dynamic library from the search path.
     (tree-sitter-load 'sdml dylib-file))
@@ -346,14 +396,14 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   "SDML"
   "Major mode for editing SDML files.
 
-Key bindings:
-\\{sdml-mode-map}"
+  Key bindings:
+  \\{sdml-mode-map}"
 
   :group 'sdml
 
   :syntax-table sdml-syntax-table
 
-  :abbrev-table nil
+  :abbrev-table sdml-abbrev-table
 
   ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
@@ -368,6 +418,8 @@ Key bindings:
   (setq prettify-symbols-alist sdml-prettify-symbols-alist)
   (prettify-symbols-mode)
 
+  (abbrev-mode)
+  
   ;; tree-sitter debug and query
   (setq-local tree-sitter-debug-jump-buttons t)
   (setq-local tree-sitter-debug-highlight-jump-region t)

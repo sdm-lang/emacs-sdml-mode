@@ -1,13 +1,14 @@
 ;;; flycheck-sdml.el --- Use Flycheck to run sdml-lint -*- lexical-binding: t; -*-
 
+;; Copyright (c) 2023 Simon Johnston
+
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Keywords: lint
-;; Version: 0.1.0
+;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (flycheck "32") (tsc "0.18.0") (dash "2.9.1"))
 
-;;; License:
+;; Keywords: lint
 
-;; Copyright (c) 2023 Simon Johnston
+;;; License:
 
 ;; Permission is hereby granted, free of charge, to any person obtaining a copy
 ;; of this software and associated documentation files (the "Software"), to deal
@@ -58,7 +59,6 @@
 ;; `(rule-id "Issue message" level "tree-sitter query")'
 ;;
 
-
 ;;; Code:
 
 (require 'flycheck)
@@ -69,19 +69,16 @@
 ;; Customization
 ;; --------------------------------------------------------------------------
 
-;; (makunbound 'sdml-lint-rules)
-;; (unintern 'sdml-lint-rules)
-
 (defcustom sdml-lint-rules
   `((module-name-case
      "Module names may not start with upper-case"
      warning
-     "((module name: (identifier) @name) (#match? @name \"^[A-Z]\"))")
+     "((module name: (identifier) @name) (#match? @name \"^[:upper:]\"))")
     ;; ----------------------------------------------------------------------
     (type-name-case
      "Type names may not start with lower-case"
      warning
-     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[a-z]\"))")
+     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[:lower:]\"))")
     ;; ----------------------------------------------------------------------
     (annotation-string-no-language
      "Annotation strings should always include a language identifier"
@@ -94,11 +91,6 @@
      warning
      ,(concat "((annotation value: (value (string) @value)) (#eq? @value \"\\\"\\\"\"))"
               "((annotation value: (value (list_of_values (string) @value))) (#eq? @value \"\\\"\\\"\"))"))
-    ;; ----------------------------------------------------------------------
-    (entity-no-identity
-     "Entities should include an identifying member"
-     warning
-     "(entity_def !identity) @entity")
     ;; ----------------------------------------------------------------------
     (types-missing-bodies
      "Incomplete type definition"
