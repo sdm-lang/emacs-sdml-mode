@@ -5,8 +5,8 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (org "9.6.0"))
-
-;; Keywords: sdml
+;; URL: https://github.com/johnstonskj/emacs-sdml-mode
+;; Keywords: languages tools
 
 ;;; License:
 
@@ -30,7 +30,26 @@
 
 ;;; Commentary:
 
-;; Complete description goes here.
+;; Provides Babel integration for SDML source blocks. This relies on the
+;; command-line tool `sdml' (https://github.com/johnstonskj/rust-sdml) to
+;; run checkers, diagram generators, and conversion tools.
+;;
+
+;; Usage
+;;
+;; The following header arguments are specifically used on source blocks:
+;;
+;; `:cmd' -- optional, the name or path to the command-line tool. Default is "sdml".
+;; `:cmdline' -- required, denotes the action to perform.
+;; `:file' -- required, the file to output results to.
+;;
+;; Examples
+;;
+;; #+BEGIN_SRC sdml :cmdline draw --diagram concepts :file diagram.svg
+;;
+;;
+;; #+BEGIN_SRC sdml :cmdline draw --diagram concepts --output-format source :file diagram.dot
+;;
 
 ;;; Code:
 
@@ -53,7 +72,8 @@ parameters may be used, like sdml -v"
     (:exports . "results"))
   "Default arguments to use when evaluating a SDML source block.")
 
-(defun org-babel-expand-body:sdml (body params)
+;; Following required naming convention
+(defun ob-sdml-expand-body (body params)
   "Expand BODY according to PARAMS, return the expanded body."
   (let ((vars (org-babel--get-vars params)))
     (mapc
@@ -86,7 +106,7 @@ This function is called by `org-babel-execute-src-block'."
 	     (coding-system-for-write 'utf-8)
 	     (in-file (org-babel-temp-file (format "%s-" ob-sdml-cmd))))
     (with-temp-file in-file
-      (insert (org-babel-expand-body:sdml body params)))
+      (insert (ob-sdml-expand-body body params)))
     (message "%s" (concat cmd
          	 " " cmdline
              output-format

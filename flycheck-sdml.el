@@ -5,8 +5,8 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (flycheck "32") (tsc "0.18.0") (dash "2.9.1"))
-
-;; Keywords: lint
+;; URL: https://github.com/johnstonskj/emacs-sdml-mode
+;; Keywords: languages tools
 
 ;;; License:
 
@@ -69,7 +69,7 @@
 ;; Customization
 ;; --------------------------------------------------------------------------
 
-(defcustom sdml-lint-rules
+(defcustom flycheck-sdml-lint-rules
   `((module-name-case
      "Module names may not start with upper-case"
      warning
@@ -190,7 +190,7 @@ CHECKER is this checker, and CALLBACK is the flycheck dispatch function."
                            (-filter (lambda (rule)
                                       (and (not (equal (nth 1 rule) 'nil))
                                            (not (string= (nth 2 rule) ""))))
-                                    sdml-lint-rules)))))
+                                    flycheck-sdml-lint-rules)))))
     (funcall callback 'finished results)))
 
 

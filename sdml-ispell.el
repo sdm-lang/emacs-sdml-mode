@@ -5,8 +5,8 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
 ;; Package-Requires: ((emacs "28.2") (sdml-mode "0.1.3") (tree-sitter-ispell "0.1.0"))
-
-;; Keywords: sdml spelling
+;; URL: https://github.com/johnstonskj/emacs-sdml-mode
+;; Keywords: languages tools
 
 ;;; License:
 
@@ -57,6 +57,7 @@
 ;; Customization
 ;; --------------------------------------------------------------------------
 
+;; Following required naming convention
 (defcustom tree-sitter-ispell-sdml-text-mapping
   '(quoted_string comment)
   "Tree-sitter node types to be spell checked with ispell."
@@ -88,7 +89,7 @@ Key bindings:
 \\{sdml-ispell-mode-map}"
   :group 'sdml
   :tag "Enable SDML ispell minor mode"
-  
+
   ;; How do we "disable" this?
   (when sdml-ispell-mode
     (tree-sitter-ispell-run-buffer)))

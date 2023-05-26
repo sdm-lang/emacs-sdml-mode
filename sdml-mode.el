@@ -4,9 +4,9 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
-;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3") (ts-fold "0.1.0"))
-
-;; Keywords: language
+;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
+;; URL: https://github.com/johnstonskj/emacs-sdml-mode
+;; Keywords: languages tools
 
 ;;; License:
 
@@ -81,9 +81,6 @@
 (require 'tree-sitter)
 (require 'tree-sitter-hl) ;; included in above
 (require 'tree-sitter-indent)
-(require 'ts-fold)
-(require 'ts-fold-indicators) ;; included in above
-
 
 ;; --------------------------------------------------------------------------
 ;; Customization
@@ -113,6 +110,8 @@
 ;; Additional Faces
 ;; --------------------------------------------------------------------------
 
+;; Unfortunately the name prefix and use of ":" comes from the `tree-sitter-hl'
+;; package and is required.
 (defface tree-sitter-hl-face:type.scope
   '((default :inherit tree-sitter-hl-face:type))
   "Face for type scopes, or namespaces, in definitions and type constraints."
@@ -138,6 +137,8 @@
 ;; Highlighting
 ;; --------------------------------------------------------------------------
 
+;; Unfortunately the name prefix and use of ":" comes from the `tree-sitter-hl'
+;; package and is required.
 (defconst sdml-mode-tree-sitter-hl-patterns
   [
    ;; Comments
@@ -249,6 +250,8 @@
 ;; Indentation
 ;; --------------------------------------------------------------------------
 
+;; Unfortunately the name prefix and use of ":" here comes from the
+;; `tree-sitter-indent' package and is required.
 (defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
     (indent-all . ())
@@ -288,19 +291,20 @@
 ;; Folding
 ;; --------------------------------------------------------------------------
 
-(defconst sdml-mode-folding-definitions
-  '((data_type_def . (ts-fold-range-seq 7 2))
-    (entity_def . (ts-fold-range-seq 5 2))
-    (enum_def . (ts-fold-range-seq 3 2))
-    (event_def . (ts-fold-range-seq 4 2))
-    (entity_body . (ts-fold-range-seq 1 -2))
-    (structure_body . (ts-fold-range-seq 1 -2))
-    (enum_body . (ts-fold-range-seq 1 -2))
-    (annotation_only_body . (ts-fold-range-seq 1 -2))
-    (entity_group . (ts-fold-range-seq 4 -2))
-    (structure_group . (ts-fold-range-seq 4 -2))
-    (list_of_values . ts-fold-range-seq)
-    (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;")))))
+(when (featurep 'ts-fold)
+  (defconst sdml-mode-folding-definitions
+    '((data_type_def . (ts-fold-range-seq 7 2))
+      (entity_def . (ts-fold-range-seq 5 2))
+      (enum_def . (ts-fold-range-seq 3 2))
+      (event_def . (ts-fold-range-seq 4 2))
+      (entity_body . (ts-fold-range-seq 1 -2))
+      (structure_body . (ts-fold-range-seq 1 -2))
+      (enum_body . (ts-fold-range-seq 1 -2))
+      (annotation_only_body . (ts-fold-range-seq 1 -2))
+      (entity_group . (ts-fold-range-seq 4 -2))
+      (structure_group . (ts-fold-range-seq 4 -2))
+      (list_of_values . ts-fold-range-seq)
+      (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
 
 
 ;; --------------------------------------------------------------------------
@@ -366,8 +370,7 @@
     ("xs" "xsd:string")
     ("xi" "xsd:integer")
     ("xb" "xsd:boolean")
-    ("xu" "xsd:anyURI")
-    ))
+    ("xu" "xsd:anyURI")))
 
 ;; --------------------------------------------------------------------------
 ;; Mode Definition
@@ -419,7 +422,7 @@
   (prettify-symbols-mode)
 
   (abbrev-mode)
-  
+
   ;; tree-sitter debug and query
   (setq-local tree-sitter-debug-jump-buttons t)
   (setq-local tree-sitter-debug-highlight-jump-region t)
@@ -431,13 +434,14 @@
   (tree-sitter-indent-mode)
 
   ;; Additional tree-sitter capabilities
-  (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
-  (ts-fold-mode)
+  (when (featurep 'ts-fold)
+    
+    (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
+    (ts-fold-mode)
+    (ts-fold-line-comment-mode)
 
-  ;; ts-fold plugins:
-  (when (and window-system (featurep ts-fold-indicators))
-    (ts-fold-indicators-mode))
-  (ts-fold-line-comment-mode))
+    (when (and window-system (featurep ts-fold-indicators))
+      (ts-fold-indicators-mode))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-mode))
