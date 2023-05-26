@@ -441,7 +441,7 @@
 
   ;; Additional tree-sitter capabilities
   (when (featurep 'ts-fold)
-    
+
     (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
     (ts-fold-mode)
     (ts-fold-line-comment-mode)

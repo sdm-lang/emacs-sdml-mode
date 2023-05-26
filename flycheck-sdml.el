@@ -154,7 +154,6 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
         (err-message (nth 1 rule))
         (lint-level (nth 2 rule))
         (patterns (nth 3 rule)))
-    (message "rule: %s" patterns)
     (tsc--without-restriction
       (when-let*
           ((query
@@ -171,9 +170,7 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
            (root-node (tsc-root-node tree-sitter-tree))
            (captures (tsc-query-captures query root-node #'tsc--buffer-substring-no-properties)))
         (if (= (length captures) 0)
-            (progn
-              (message "No captures found in query %s [%s]" patterns rule-name)
-              '())
+            '()
           (mapcar (lambda (cap) (flycheck-sdml--make-error rule-name err-message lint-level cap)) captures))))))
 
 ;; --------------------------------------------------------------------------
