@@ -73,12 +73,12 @@
   `((module-name-case
      "Module names may not start with upper-case"
      warning
-     "((module name: (identifier) @name) (#match? @name \"^[:upper:]\"))")
+     "((module name: (identifier) @name) (#match? @name \"^[[:upper:]]\"))")
     ;; ----------------------------------------------------------------------
     (type-name-case
      "Type names may not start with lower-case"
      warning
-     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[:lower:]\"))")
+     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[[:lower:]]\"))")
     ;; ----------------------------------------------------------------------
     (annotation-string-no-language
      "Annotation strings should always include a language identifier"
