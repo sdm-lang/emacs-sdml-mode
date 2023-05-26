@@ -54,6 +54,10 @@
 
 ;; Folding
 ;;
+;; This uses a package `ts-fold' which is not packaged for a repository and must
+;; therefore be installed and required PRIOR to this package if you want to enable
+;; folding.
+;;
 ;; `\\[ts-fold-close]' -- fold item
 ;; `\\[ts-fold-open]' -- unfold item
 ;; `\\[ts-fold-close-all]' -- fold all items in buffer
@@ -63,6 +67,8 @@
 ;;
 
 ;; Fold Indicators
+;;
+;; This is only enabled if folding is enabled (see above) and running in GUI mode.
 ;;
 ;; To switch to left/right fringe: (Default is left-fringe)
 ;;
