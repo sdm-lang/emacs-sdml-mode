@@ -79,7 +79,7 @@ parameters may be used, like sdml -v"
     (mapc
      (lambda (pair)
        (let ((name (symbol-name (car pair)))
-	     (value (cdr pair)))
+             (value (cdr pair)))
 	 (setq body
 	       (replace-regexp-in-string
 		(concat "$" (regexp-quote name))

@@ -54,7 +54,7 @@
 
 ;; Folding
 ;;
-;; This uses a package `ts-fold' which is not packaged for a repository and must
+;; This uses a package `ts-fold' which is not provided by any repository and must
 ;; therefore be installed and required PRIOR to this package if you want to enable
 ;; folding.
 ;;
@@ -116,8 +116,8 @@
 ;; Additional Faces
 ;; --------------------------------------------------------------------------
 
-;; Unfortunately the name prefix and use of ":" comes from the `tree-sitter-hl'
-;; package and is required.
+;; The `tree-sitter-hl' package expects to map highlight scopes to faces named
+;; `tree-sitter-hl-face:{{scope}}', which plays havoc with package-lint.
 (defface tree-sitter-hl-face:type.scope
   '((default :inherit tree-sitter-hl-face:type))
   "Face for type scopes, or namespaces, in definitions and type constraints."
@@ -143,8 +143,6 @@
 ;; Highlighting
 ;; --------------------------------------------------------------------------
 
-;; Unfortunately the name prefix and use of ":" comes from the `tree-sitter-hl'
-;; package and is required.
 (defconst sdml-mode-tree-sitter-hl-patterns
   [
    ;; Comments
@@ -256,9 +254,10 @@
 ;; Indentation
 ;; --------------------------------------------------------------------------
 
-;; Unfortunately the name prefix and use of ":" here comes from the
-;; `tree-sitter-indent' package and is required.
-(defconst tree-sitter-indent-sdml-scopes
+;; The `tree-sitter-indent' package expects to find a function named
+;; `tree-sitter-indent-{{language}}-scopes', which plays havoc with
+;; package-lint.
+defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
     (indent-all . ())
 
@@ -439,8 +438,9 @@
   (tree-sitter-hl-mode)
   (tree-sitter-indent-mode)
 
-  ;; Additional tree-sitter capabilities
   (when (featurep 'ts-fold)
+    ;; The package `ts-fold' must be installed and required PRIOR to this
+    ;; package if you want to enable folding.
 
     (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
     (ts-fold-mode)

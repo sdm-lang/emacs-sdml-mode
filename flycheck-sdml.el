@@ -4,7 +4,7 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
-;; Package-Requires: ((emacs "28.2") (flycheck "32") (tsc "0.18.0") (dash "2.9.1"))
+;; Package-Requires: ((emacs "28.2") (flycheck "32") (tree-sitter "0.18.0") (tsc "0.18.0") (dash "2.9.1"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
 
@@ -62,6 +62,7 @@
 ;;; Code:
 
 (require 'flycheck)
+(require 'tree-sitter)
 (require 'tsc)
 (require 'dash)
 
@@ -181,9 +182,10 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
   "Flycheck start function for sdml.
 
 CHECKER is this checker, and CALLBACK is the flycheck dispatch function."
+  (message "Running flycheck checker %s" checker)
   (let* ((results (-flatten-n
                    1
-                   (mapcar 'flycheck-sdml--run-lint-rule
+                   (mapcar #'flycheck-sdml--run-lint-rule
                            (-filter (lambda (rule)
                                       (and (not (equal (nth 1 rule) 'nil))
                                            (not (string= (nth 2 rule) ""))))

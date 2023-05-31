@@ -57,7 +57,9 @@
 ;; Customization
 ;; --------------------------------------------------------------------------
 
-;; Following required naming convention
+;; The `tree-sitter-ispell' package expects to find a function named
+;; `tree-sitter-ispell-{{language}}-text-mapping', which plays havoc with
+;; package-lint.
 (defcustom tree-sitter-ispell-sdml-text-mapping
   '(quoted_string comment)
   "Tree-sitter node types to be spell checked with ispell."

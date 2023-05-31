@@ -6,8 +6,11 @@ This package provides an Emacs tree-sitter based major mode for SDML - the
 
 # Installing
 
-Currently the package is not published and so installation has to be done manually. First clone the Git repository to a
-local path.
+Currently the package is not published and so installation has to be done manually.
+
+## Install manually
+
+First clone the Git repository to a local path.
 
 ```bash
 > git clone https://github.com/johnstonskj/emacs-sdml-mode.git
@@ -168,3 +171,29 @@ as well.
 <<lst:rentals-example>>
 #+END_SRC
 ```
+
+# Contributing
+
+The packages in this repository should pass the standard package checks, including:
+
+* `byte-compile-file`
+* `package-lint`
+* `checkdoc`
+
+The following known *errors* are reported by package-lint due to the naming convention imposed by dependencies.
+
+``` text
+sdml-ispell.el with package-lint 20230525.1346:
+__:0: error: "tree-sitter-ispell-sdml-text-mapping" doesn't start with package's prefix "sdml-ispell".
+
+sdml-mode.el with byte-compile using Emacs 28.1:
+__:0: error: "tree-sitter-hl-face:type.scope" doesn't start with package's prefix "sdml".
+__:0: error: `tree-sitter-hl-face:type.scope' contains a non-standard separator `:', use hyphens instead (see Elisp Coding Conventions).
+__:0: error: "tree-sitter-indent-sdml-scopes" doesn't start with package's prefix "sdml".
+
+```
+
+
+# Changes
+
+TBD
