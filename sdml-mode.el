@@ -257,7 +257,7 @@
 ;; The `tree-sitter-indent' package expects to find a function named
 ;; `tree-sitter-indent-{{language}}-scopes', which plays havoc with
 ;; package-lint.
-defconst tree-sitter-indent-sdml-scopes
+(defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
     (indent-all . ())
 
