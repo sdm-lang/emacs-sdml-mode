@@ -3,7 +3,7 @@
 ;; Copyright (c) 2023 Simon Johnston
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.3
+;; Version: 0.1.4
 ;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
@@ -159,13 +159,16 @@
     "import"
     "is"
     "module"
+    "of"
     "ref"
     "source"
     "structure"
+    "union"
     (unknown_type)
     ] @keyword
 
    ;; Module & Imports
+
    (module name: (identifier) @type.scope)
 
    (member_import
@@ -175,16 +178,20 @@
     name: (identifier) @type.scope)
 
    ;; Annotations
+
    (annotation
     "@" @label
     name: (identifier_reference) @label
     "=" @operator)
 
    ;; Types
-   (entity_def
-    name: (identifier) @type)
 
-   (structure_def
+   (data_type_def
+    name: (identifier) @type
+    "<-" @operator
+    base: (identifier_reference) @type)
+
+   (entity_def
     name: (identifier) @type)
 
    (enum_def
@@ -194,12 +201,14 @@
     name: (identifier) @type
     source: (identifier_reference) @type)
 
-   (data_type_def
-    name: (identifier) @type
-    "<-" @operator
-    base: (identifier_reference) @type)
+   (structure_def
+    name: (identifier) @type)
+
+   (union_def
+    name: (identifier) @type)
 
    ;; Members
+
    (identity_member
     name: (identifier) @variable
     "->" @operator
@@ -215,11 +224,21 @@
     "->" @operator
     target: (_) @type)
 
+   (enum_variant
+    name: (identifier) @constant
+    "=" @operator)
+
+   (type_variant
+    (identifier_reference) @type)
+
    (cardinality_range ".." @operator)
 
    ;; Values
+
    (string
-    (quoted_string) @string
+    (quoted_string) @string)
+
+   (string
     language: (language_tag) @property)
 
    (iri_reference) @string.special
@@ -237,6 +256,7 @@
     name: (identifier_reference)) @function.special
 
    ;; Punctuation
+
    "(" @punctuation.bracket
    ")" @punctuation.bracket
    "[" @punctuation.bracket
@@ -266,13 +286,14 @@
 
     ;; If parent node is one of this and current node is in middle → indent
     (indent-body . (module_body
-                    entity_body
-                    structure_body
-                    enum_body
                     annotation_only_body
-                    list_of_values
+                    entity_body
+                    enum_body
+                    structure_body
+                    union_body
                     entity_group
-                    structure_group))
+                    structure_group
+                    list_of_values))
 
     ;; If parent node is one of these → indent to paren opener
     (paren-indent . ())
@@ -302,10 +323,14 @@
       (entity_def . (ts-fold-range-seq 5 2))
       (enum_def . (ts-fold-range-seq 3 2))
       (event_def . (ts-fold-range-seq 4 2))
+      (structure_def . (ts-fold-range-seq 8 2))
+      (union_def . (ts-fold-range-seq 4 2))
+      (union_def . (ts-fold-range-seq 4 2))
       (entity_body . (ts-fold-range-seq 1 -2))
-      (structure_body . (ts-fold-range-seq 1 -2))
       (enum_body . (ts-fold-range-seq 1 -2))
-      (annotation_only_body . (ts-fold-range-seq 1 -2))
+      (structure_body . (ts-fold-range-seq 1 -2))
+      (union_body . (ts-fold-range-seq 1 -2))
+      (union_def . (ts-fold-range-seq 4 2))
       (entity_group . (ts-fold-range-seq 4 -2))
       (structure_group . (ts-fold-range-seq 4 -2))
       (list_of_values . ts-fold-range-seq)

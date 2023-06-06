@@ -84,14 +84,14 @@
     (annotation-string-no-language
      "Annotation strings should always include a language identifier"
      warning
-     ,(concat "(annotation value: (value (string !language) @string))"
-              "(annotation value: (value (list_of_values (string !language) @string)))"))
+     ,(concat "(annotation value: (value (simple_value(string !language) @string)))"
+              "(annotation value: (value (list_of_values (simple_value (string !language) @string)))"))
     ;; ----------------------------------------------------------------------
     (annotation-string-empty
      "Did you mean to use an empty annotation string value?"
      warning
-     ,(concat "((annotation value: (value (string) @value)) (#eq? @value \"\\\"\\\"\"))"
-              "((annotation value: (value (list_of_values (string) @value))) (#eq? @value \"\\\"\\\"\"))"))
+     ,(concat "((annotation value: (value (simple_value (string) @value))) (#eq? @value \"\\\"\\\"\"))"
+              "((annotation value: (value (list_of_values (simple_value (string) @value)))) (#eq? @value \"\\\"\\\"\"))"))
     ;; ----------------------------------------------------------------------
     (types-missing-bodies
      "Incomplete type definition"
@@ -101,17 +101,17 @@
     (member-by-value-target-cardinality
      "By-value member cardinality is the default and may be removed"
      info
-     "((member_by_value targetCardinality: (cardinality_expression) @card) (#eq? @card \"{1..}\"))")
+     "((member_by_value target_cardinality: (cardinality_expression) @card) (#eq? @card \"{1..}\"))")
     ;; ----------------------------------------------------------------------
     (member-by-ref-source-cardinality
      "By-reference member source cardinality is the default and may be removed"
      info
-     "((member_by_reference sourceCardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))")
+     "((member_by_reference source_cardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))")
     ;; ----------------------------------------------------------------------
     (member-by-ref-target-cardinality
      "By-reference member target cardinality is the default and may be removed"
      info
-     "((member_by_reference targetCardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))"))
+     "((member_by_reference target_cardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))"))
   "SDML lint rules for Flycheck, these use tree-sitter queries to select issues."
   :tag "Lint rules for Flycheck."
   :type '(repeat (list (symbol :tag "Identifier")
