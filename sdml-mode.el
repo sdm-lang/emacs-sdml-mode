@@ -149,6 +149,7 @@
    (line_comment) @comment
 
    [
+    "as"
     "datatype"
     "end"
     "entity"
@@ -230,6 +231,9 @@
 
    (type_variant
     (identifier_reference) @type)
+
+   (type_variant
+    rename: (identifier) @type)
 
    (cardinality_range ".." @operator)
 
@@ -319,21 +323,25 @@
 
 (when (featurep 'ts-fold)
   (defconst sdml-mode-folding-definitions
-    '((data_type_def . (ts-fold-range-seq 7 2))
+    '(;; definitions
+      (data_type_def . (ts-fold-range-seq 7 2))
       (entity_def . (ts-fold-range-seq 5 2))
       (enum_def . (ts-fold-range-seq 3 2))
       (event_def . (ts-fold-range-seq 4 2))
       (structure_def . (ts-fold-range-seq 8 2))
       (union_def . (ts-fold-range-seq 4 2))
-      (union_def . (ts-fold-range-seq 4 2))
+      ;; bodies
+      (annotation_only_body . (ts-fold-range-seq 1 -2))
       (entity_body . (ts-fold-range-seq 1 -2))
       (enum_body . (ts-fold-range-seq 1 -2))
       (structure_body . (ts-fold-range-seq 1 -2))
       (union_body . (ts-fold-range-seq 1 -2))
-      (union_def . (ts-fold-range-seq 4 2))
+      ;; groups
       (entity_group . (ts-fold-range-seq 4 -2))
       (structure_group . (ts-fold-range-seq 4 -2))
+      ;; values
       (list_of_values . ts-fold-range-seq)
+      ;; comments
       (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
 
 
@@ -367,7 +375,7 @@
 (define-skeleton sdml-mode--new-entity
   "New entity." nil
   > "entity " _ " is" \n
-  > "identity id -> unknown" \n
+  > "  identity id -> unknown" \n
   > "" \n
   > "end")
 
@@ -386,8 +394,15 @@
 (define-skeleton sdml-mode--new-enum
   "New enum." nil
   > "enum " _ " is" \n
-  > "VariantOne = 1" \n
-  > "VariantTwo = 2" \n
+  > "  VariantOne = 1" \n
+  > "  VariantTwo = 2" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-union
+  "New enum." nil
+  > "union " _ " is" \n
+  > "  TypeOne" \n
+  > "  TypeTwo" \n
   > "end")
 
 (define-abbrev-table 'sdml-abbrev-table
