@@ -79,13 +79,13 @@
     (type-name-case
      "Type names may not start with lower-case"
      warning
-     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name)] (#match? @name \"^[[:lower:]]\"))")
+     "([(entity_def name: (identifier) @name) (structure_def name: (identifier) @name) (event_def name: (identifier) @name) (enum_def name: (identifier) @name) (union_def name: (identifier) @name)] (#match? @name \"^[[:lower:]]\"))")
     ;; ----------------------------------------------------------------------
     (annotation-string-no-language
      "Annotation strings should always include a language identifier"
      warning
-     ,(concat "(annotation value: (value (simple_value(string !language) @string)))"
-              "(annotation value: (value (list_of_values (simple_value (string !language) @string)))"))
+     ,(concat "(annotation value: (value (simple_value (string !language) @string)))"
+              "(annotation value: (value (list_of_values (simple_value (string !language) @string))))"))
     ;; ----------------------------------------------------------------------
     (annotation-string-empty
      "Did you mean to use an empty annotation string value?"
@@ -96,7 +96,7 @@
     (types-missing-bodies
      "Incomplete type definition"
      info
-     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body)] @type")
+     "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body) (union_def !body)] @type")
     ;; ----------------------------------------------------------------------
     (member-by-value-target-cardinality
      "By-value member cardinality is the default and may be removed"
@@ -166,7 +166,7 @@ RULE-ID, ERR-MESSAGE, and LINT-LEVEL."
                (message "%s: %s" (get (car err) 'error-message) (cadr err))
                nil)
               (tsc-query-invalid
-               (message "%s" (get (car err) 'error-message))
+               (message "%s | %s" (get (car err) 'error-message) patterns)
                nil)))
            (root-node (tsc-root-node tree-sitter-tree))
            (captures (tsc-query-captures query root-node #'tsc--buffer-substring-no-properties)))

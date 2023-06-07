@@ -185,6 +185,9 @@
     name: (identifier_reference) @label
     "=" @operator)
 
+   (annotation
+    value: (value (identifier_reference) @type))
+
    ;; Types
 
    (data_type_def
