@@ -3,7 +3,7 @@
 ;; Copyright (c) 2023 Simon Johnston
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.4
+;; Version: 0.1.5
 ;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
@@ -150,6 +150,7 @@
 
    [
     "as"
+    "base"
     "datatype"
     "end"
     "entity"
@@ -261,6 +262,12 @@
 
    (value_constructor
     name: (identifier_reference)) @function.special
+
+    (value
+     (identifier_reference) @type)
+
+    (list_of_values
+     (identifier_reference) @type)
 
    ;; Punctuation
 
