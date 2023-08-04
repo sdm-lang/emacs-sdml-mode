@@ -111,13 +111,13 @@ This function is called by `org-babel-execute-src-block'."
          	 " " cmdline
              output-format
 	         " --output-file " (org-babel-process-file-name out-file)
-             " " (org-babel-process-file-name in-file)))
+             " --input-file " (org-babel-process-file-name in-file)))
     (org-babel-eval
      (concat cmd
          	 " " cmdline
              output-format
 	         " --output-file " (org-babel-process-file-name out-file)
-             " " (org-babel-process-file-name in-file)) "")
+             " --input-file " (org-babel-process-file-name in-file)) "")
     ;; signal that output has already been written to file
     nil))
 

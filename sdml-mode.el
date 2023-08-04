@@ -145,103 +145,225 @@
 
 (defconst sdml-mode-tree-sitter-hl-patterns
   [
+   ;; -------------------------------------------------------------------
    ;; Comments
+   ;; -------------------------------------------------------------------
+
    (line_comment) @comment
 
+   ;; -------------------------------------------------------------------
+   ;; Keywords
+   ;; -------------------------------------------------------------------
+
    [
+    "and"
     "as"
+    "assert"
     "base"
     "datatype"
+    "def"
     "end"
     "entity"
     "enum"
     "event"
+    "exists"
+    "forall"
     "group"
     "identity"
+    "iff"
+    "implies"
     "import"
+    "in"
     "is"
     "module"
+    "not"
     "of"
+    "or"
+    "property"
     "ref"
     "source"
     "structure"
     "union"
+    "xor"
     (unknown_type)
+    (builtin_simple_type)
+    (reserved_self)
+    (reserved_self_type)
+    (sequence_ordering)
+    (sequence_uniqueness)
     ] @keyword
 
+   ;; -------------------------------------------------------------------
+   ;; Operators
+   ;; -------------------------------------------------------------------
+   [
+    "="
+    ":="
+    "≔"
+    "¬"
+    "∧"
+    "∨"
+    "⊻"
+    "==>"
+    "⇒"
+    "<==>"
+    "⇔"
+    "∀"
+    "∃"
+    "∈"
+    "->"
+    "<-"
+    ".."
+    ] @operator
+
+   ;; -------------------------------------------------------------------
    ;; Module & Imports
+   ;; -------------------------------------------------------------------
 
    (module name: (identifier) @type.scope)
 
-   (member_import
-    name: (qualified_identifier) @type)
+   (import_statement [ "[" "]" ] @punctuation.bracket)
 
-   (module_import
-    name: (identifier) @type.scope)
+   (member_import name: (qualified_identifier) @type)
 
-   ;; Annotations
+   (module_import name: (identifier) @type.scope)
 
-   (annotation
+   ;; -------------------------------------------------------------------
+   ;; Annotations and Constraints
+   ;; -------------------------------------------------------------------
+
+   (annotation_property
     "@" @label
-    name: (identifier_reference) @label
-    "=" @operator)
+    name: (identifier_reference) @label)
 
-   (annotation
-    value: (value (identifier_reference) @type))
+   (annotation_property value: (value (identifier_reference) @type))
 
+   (constraint name: (identifier) @label)
+
+   (informal_constraint (quoted_string) @embedded)
+
+   (informal_constraint language: (controlled_language_tag) @property)
+
+   (environment_definition name: (identifier) @function.definition)
+
+   (constraint_environment (constraint_environment_end) @keyword)
+
+   (constraint_sentence [ "(" ")" ] @punctuation.bracket)
+
+   (name_path
+   "." @punctuation.delimiter
+    path: (identifier) @function.call)
+
+   (term (name_path subject: (identifier) @variable.special))
+   (equation (term (identifier_reference) @variable))
+
+   (functional_term
+    function: (_) @function.call
+    [ "(" ")" ] @punctuation.bracket)
+
+   (functional_term arguments: (term (identifier_reference) @variable))
+
+   (atomic_sentence
+    predicate: (_) @function.call
+    [ "(" ")" ] @punctuation.bracket)
+
+   (atomic_sentence arguments: (term (identifier_reference) @variable))
+
+   (quantified_body [ "(" ")" ] @punctuation.bracket)
+
+   (quantifier_binding (reserved_self) @keyword)
+   (quantifier_binding name: (identifier) @variable.special)
+
+   (binding_type_reference (reserved_self_type) @keyword)
+   (binding_type_reference from_type: (identifier_reference) @type)
+
+   (binding_seq_iterator from_collection: (identifier_reference) @variable)
+   (binding_seq_iterator from_collection: (name_path subject: (identifier) @variable.special))
+   (binding_seq_iterator from_collection: (name_path path: (identifier) @method.call))
+
+   (fn_parameter name: (identifier) @variable.parameter)
+
+   (fn_type (any_type) @type)
+   (fn_type (type_reference (identifier_reference) @type))
+
+   (collection_type
+    collection: (builtin_collection_type) @type
+    element: (_) @type)
+
+   (list_of_predicate_values [ "[" "]" ] @punctuation.bracket)
+
+   (sequence_comprehension
+    "{" @punctuation.bracket
+    "|" @punctuation.separator
+    "}" @punctuation.bracket)
+
+   (local_binding name: (identifier) @variable.special)
+
+   (returned_value (identifier) @variable)
+   (returned_value [ "[" "]" ] @punctuation.bracket)
+
+   (list_of_predicate_values [ "[" "]" ] @punctuation.bracket)
+
+   ;; -------------------------------------------------------------------
    ;; Types
+   ;; -------------------------------------------------------------------
 
    (data_type_def
     name: (identifier) @type
-    "<-" @operator
-    base: (identifier_reference) @type)
+    base: (data_type_base (identifier_reference) @type))
 
-   (entity_def
-    name: (identifier) @type)
+   (entity_def name: (identifier) @type)
 
-   (enum_def
-    name: (identifier) @type)
+   (enum_def name: (identifier) @type)
 
    (event_def
     name: (identifier) @type
     source: (identifier_reference) @type)
 
-   (structure_def
-    name: (identifier) @type)
+   (structure_def name: (identifier) @type)
 
-   (union_def
-    name: (identifier) @type)
+   (union_def name: (identifier) @type)
 
+   ;; -------------------------------------------------------------------
    ;; Members
+   ;; -------------------------------------------------------------------
 
-   (identity_member
+   (identity_member name: (identifier) @variable)
+   (identity_member role: (identifier) @variable.special)
+   (identity_member target: (type_reference) @type)
+
+   (member_by_value name: (identifier) @variable)
+   (member_by_value role: (identifier) @variable.special)
+   (member_by_value target: (type_reference) @type)
+
+   (member_by_reference name: (identifier) @variable)
+   (member_by_reference role: (identifier) @variable.special)
+   (member_by_reference target: (type_reference) @type)
+
+   (member_inverse_name
+    "(" @punctuation.bracket
+    (identifier) @variable
+    ")" @punctuation.bracket)
+
+   (value_variant name: (identifier) @constant)
+
+   (type_variant (identifier_reference) @type)
+
+   (type_variant rename: (identifier) @type)
+
+   (cardinality_expression [ "{" "}" ] @punctuation.bracket)
+
+   (mapping_type [ "(" ")" ] @punctuation.bracket)
+
+   (property_def name: (identifier) @variable)
+
+   (property_role
     name: (identifier) @variable
-    "->" @operator
-    target: (_) @type)
+    target: (type_reference) @type)
 
-   (member_by_value
-    name: (identifier) @variable
-    "->" @operator
-    target: (_) @type)
-
-   (member_by_reference
-    name: (identifier) @variable
-    "->" @operator
-    target: (_) @type)
-
-   (enum_variant
-    name: (identifier) @constant
-    "=" @operator)
-
-   (type_variant
-    (identifier_reference) @type)
-
-   (type_variant
-    rename: (identifier) @type)
-
-   (cardinality_range ".." @operator)
-
+   ;; -------------------------------------------------------------------
    ;; Values
+   ;; -------------------------------------------------------------------
 
    (string
     (quoted_string) @string)
@@ -261,22 +383,18 @@
    (boolean) @constant.builtin
 
    (value_constructor
-    name: (identifier_reference)) @function.special
+    name: (identifier_reference) @function.special
+    [ "(" ")" ] @punctuation.bracket)
 
-    (value
-     (identifier_reference) @type)
+    (value (identifier_reference) @type)
 
-    (list_of_values
-     (identifier_reference) @type)
+    (list_of_values (identifier_reference) @type)
 
-   ;; Punctuation
+    (list_of_values [ "[" "]" ] @punctuation.bracket)
 
-   "(" @punctuation.bracket
-   ")" @punctuation.bracket
-   "[" @punctuation.bracket
-   "]" @punctuation.bracket
-   "{" @punctuation.bracket
-   "}" @punctuation.bracket
+    ;; -------------------------------------------------------------------
+   ;; Errors
+   ;; -------------------------------------------------------------------
 
    ;; Highlight errors in red. This is not very useful in practice, as text will
    ;; be highlighted as user types, and the error could be elsewhere in the code.
@@ -307,16 +425,21 @@
                     union_body
                     entity_group
                     structure_group
-                    list_of_values))
+                    list_of_values
+                    constraint
+                    formal_constraint))
 
     ;; If parent node is one of these → indent to paren opener
-    (paren-indent . ())
+    (paren-indent . (universal
+                     existential))
 
     ;; Chaining char → node types we move parentwise to find the first chaining char
     (align-char-to . ())
 
     ;; Siblings (nodes with same parent) should be aligned to the first child
-    (aligned-siblings . (enum_variant))
+    (aligned-siblings . (value_variant
+                         type_variant
+                         environment_definition))
 
     ;; if node is one of this, then don't modify the indent
     ;; this is basically a peaceful way out by saying "this looks like something
@@ -324,7 +447,7 @@
     (multi-line-text . (quoted_string))
 
     ;; These nodes always outdent (1 shift in opposite direction)
-    (outdent . ())))
+    (outdent . (constraint_environment_end))))
 
 
 ;; --------------------------------------------------------------------------
@@ -340,17 +463,21 @@
       (event_def . (ts-fold-range-seq 4 2))
       (structure_def . (ts-fold-range-seq 8 2))
       (union_def . (ts-fold-range-seq 4 2))
+      (property_def . (ts-fold-range-seq 7 2))
       ;; bodies
       (annotation_only_body . (ts-fold-range-seq 1 -2))
       (entity_body . (ts-fold-range-seq 1 -2))
       (enum_body . (ts-fold-range-seq 1 -2))
       (structure_body . (ts-fold-range-seq 1 -2))
       (union_body . (ts-fold-range-seq 1 -2))
+      (property_body . (ts-fold-range-seq 1 -2))
       ;; groups
       (entity_group . (ts-fold-range-seq 4 -2))
       (structure_group . (ts-fold-range-seq 4 -2))
       ;; values
       (list_of_values . ts-fold-range-seq)
+      ;; Constraints
+      (constraint . (ts-fold-range-seq 5 2))
       ;; comments
       (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
 
@@ -403,29 +530,65 @@
 
 (define-skeleton sdml-mode--new-enum
   "New enum." nil
-  > "enum " _ " is" \n
+  > "enum " _ " of" \n
   > "  VariantOne = 1" \n
   > "  VariantTwo = 2" \n
   > "end")
 
 (define-skeleton sdml-mode--new-union
-  "New enum." nil
-  > "union " _ " is" \n
+  "New discriminated union." nil
+  > "union " _ " of" \n
   > "  TypeOne" \n
   > "  TypeTwo" \n
   > "end")
+
+(define-skeleton sdml-mode--new-constraint
+  "New informal constraint." nil
+  > "assert " _ " = \"\"")
+
+(define-skeleton sdml-mode--new-formal-constraint
+  "New formal constraint." nil
+  > "assert " _ " is" \n
+  > "  forall self (" \n
+  > "    ⊤" \n
+  > "  )" \n
+  > "end")
+
+(define-skeleton sdml-mode--new-constraint-def
+  "New formal constraint definition." nil
+  > "def " _ "() := ")
+
+(define-skeleton sdml-mode--new-constraint-forall
+  "New formal constraint definition." nil
+  > "forall " _ " ()")
+
+(define-skeleton sdml-mode--new-constraint-exists
+  "New formal constraint definition." nil
+  > "exists " _ " ()")
+
+(define-skeleton sdml-mode--new-label
+  "New SKOS preferred label." nil
+  > "@skos:prefLabel " _ " = \"\"@en")
 
 (define-abbrev-table 'sdml-abbrev-table
   '(("uk" "-> unknown")
     ("mod" "" 'sdml-mode--new-module)
     ("ent" "" 'sdml-mode--new-entity)
-    ("str" "" 'sdml-mode--new-structure)
-    ("evt" "" 'sdml-mode--new-event)
     ("enu" "" 'sdml-mode--new-enum)
-    ("xs" "xsd:string")
-    ("xi" "xsd:integer")
-    ("xb" "xsd:boolean")
-    ("xu" "xsd:anyURI")))
+    ("evt" "" 'sdml-mode--new-event)
+    ("str" "" 'sdml-mode--new-structure)
+    ("uni" "" 'sdml-mode--new-union)
+    ("ass" "" 'sdml-mode--new-constraint)
+    ("fass" "" 'sdml-mode--new-formal-constraint)
+    ("lbl" "" 'sdml-mode--new-label)
+    ("all" "" 'sdml-mode--new-constraint-forall)
+    ("any" "" 'sdml-mode--new-constraint-exists)
+    ("db" "boolean")
+    ("dd" "decimal")
+    ("df" "double")
+    ("di" "integer")
+    ("di" "iri")
+    ("ds" "string")))
 
 ;; --------------------------------------------------------------------------
 ;; Mode Definition
