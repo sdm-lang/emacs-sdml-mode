@@ -196,6 +196,7 @@
    ;; -------------------------------------------------------------------
    ;; Operators
    ;; -------------------------------------------------------------------
+
    [
     "="
     ":="
@@ -246,63 +247,61 @@
 
    (environment_definition name: (identifier) @function.definition)
 
+   (function_signature target: (_) @type)
+   (function_parameter name: (identifier) @variable.parameter)
+   (function_parameter target: (_) @type)
+
    (constraint_environment (constraint_environment_end) @keyword)
 
    (constraint_sentence [ "(" ")" ] @punctuation.bracket)
 
-   (name_path
-   "." @punctuation.delimiter
-    path: (identifier) @function.call)
+   (name_path subject: (reserved_self) @keyword)
+   (name_path subject: (identifier) @function.call)
+   (name_path path: (identifier) @function.call)
+   (name_path "." @punctuation.delimiter)
 
-   (term (name_path subject: (identifier) @variable.special))
-   (equation (term (identifier_reference) @variable))
+   (term (qualified_identifier) @type)
 
-   (functional_term
-    function: (_) @function.call
-    [ "(" ")" ] @punctuation.bracket)
+   (functional_term function: (term (identifier) @function.call))
 
-   (functional_term arguments: (term (identifier_reference) @variable))
+   (functional_term arguments: (term (identifier) @variable))
 
-   (atomic_sentence
-    predicate: (_) @function.call
-    [ "(" ")" ] @punctuation.bracket)
+   (functional_term [ "(" ")" ] @punctuation.bracket)
 
-   (atomic_sentence arguments: (term (identifier_reference) @variable))
+   (atomic_sentence predicate: (term (identifier) @function.call))
+
+   (atomic_sentence arguments: (term (identifier) @variable))
+
+   (atomic_sentence [ "(" ")" ] @punctuation.bracket)
+
+   (equation lhs: (term (identifier) @variable))
+
+   (equation rhs: (term (identifier) @variable))
 
    (quantified_body [ "(" ")" ] @punctuation.bracket)
 
    (quantifier_binding (reserved_self) @keyword)
-   (quantifier_binding name: (identifier) @variable.special)
+   (quantifier_binding name: (identifier) @variable)
 
-   (binding_type_reference (reserved_self_type) @keyword)
-   (binding_type_reference from_type: (identifier_reference) @type)
+   (type_iterator from: (reserved_self_type) @keyword)
+   (type_iterator from: (identifier_reference) @type)
 
-   (binding_seq_iterator from_collection: (identifier_reference) @variable)
-   (binding_seq_iterator from_collection: (name_path subject: (identifier) @variable.special))
-   (binding_seq_iterator from_collection: (name_path path: (identifier) @method.call))
+   (sequence_iterator from: (identifier) @variable)
 
-   (fn_parameter name: (identifier) @variable.parameter)
-
-   (fn_type (any_type) @type)
-   (fn_type (type_reference (identifier_reference) @type))
-
-   (collection_type
-    collection: (builtin_collection_type) @type
-    element: (_) @type)
-
-   (list_of_predicate_values [ "[" "]" ] @punctuation.bracket)
-
-   (sequence_comprehension
+   (sequence_builder
     "{" @punctuation.bracket
     "|" @punctuation.separator
     "}" @punctuation.bracket)
 
    (local_binding name: (identifier) @variable.special)
 
-   (returned_value (identifier) @variable)
-   (returned_value [ "[" "]" ] @punctuation.bracket)
+   (tuple_variable (identifier) @variable)
+   (sequence_variable (identifier) @variable)
+   (mapping_variable domain: (identifier) range: (identifier) @variable)
 
-   (list_of_predicate_values [ "[" "]" ] @punctuation.bracket)
+   (sequence_of_predicate_values [ "{" "}" ] @punctuation.bracket)
+   (sequence_of_predicate_values [ "[" "]" ] @punctuation.bracket)
+   (sequence_of_predicate_values (identifier_reference) @type)
 
    ;; -------------------------------------------------------------------
    ;; Types
@@ -329,15 +328,15 @@
    ;; -------------------------------------------------------------------
 
    (identity_member name: (identifier) @variable)
-   (identity_member role: (identifier) @variable.special)
+   (identity_member property: (identifier_reference) @variable.special)
    (identity_member target: (type_reference) @type)
 
    (member_by_value name: (identifier) @variable)
-   (member_by_value role: (identifier) @variable.special)
+   (member_by_value property: (identifier_reference) @variable.special)
    (member_by_value target: (type_reference) @type)
 
    (member_by_reference name: (identifier) @variable)
-   (member_by_reference role: (identifier) @variable.special)
+   (member_by_reference property: (identifier_reference) @variable.special)
    (member_by_reference target: (type_reference) @type)
 
    (member_inverse_name
@@ -357,8 +356,16 @@
 
    (property_def name: (identifier) @variable)
 
-   (property_role
-    name: (identifier) @variable
+   (identity_role
+    name: (identifier) @variable.field
+    target: (type_reference) @type)
+
+   (role_by_value
+    name: (identifier) @variable.field
+    target: (type_reference) @type)
+
+   (role_by_reference
+    name: (identifier) @variable.field
     target: (type_reference) @type)
 
    ;; -------------------------------------------------------------------
@@ -388,9 +395,9 @@
 
     (value (identifier_reference) @type)
 
-    (list_of_values (identifier_reference) @type)
-
-    (list_of_values [ "[" "]" ] @punctuation.bracket)
+    (sequence_of_values [ "{" "}" ] @punctuation.bracket)
+    (sequence_of_values [ "[" "]" ] @punctuation.bracket)
+    (sequence_of_values (identifier_reference) @type)
 
     ;; -------------------------------------------------------------------
    ;; Errors
@@ -420,12 +427,14 @@
     (indent-body . (module_body
                     annotation_only_body
                     entity_body
+                    entity_group
                     enum_body
                     structure_body
-                    union_body
-                    entity_group
                     structure_group
-                    list_of_values
+                    union_body
+                    property_body
+                    sequence_of_values
+                    sequence_of_predicate_values
                     constraint
                     formal_constraint))
 
