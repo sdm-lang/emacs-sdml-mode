@@ -167,6 +167,7 @@
     "enum"
     "event"
     "exists"
+    "features"
     "forall"
     "group"
     "identity"
@@ -185,10 +186,6 @@
     "structure"
     "union"
     "xor"
-    (unknown_type)
-    (builtin_simple_type)
-    (reserved_self)
-    (reserved_self_type)
     (sequence_ordering)
     (sequence_uniqueness)
     ] @keyword
@@ -217,20 +214,31 @@
     ".."
     ] @operator
 
+;; ----------------------------------------------------------------------
+;; Brackets
+;; ----------------------------------------------------------------------
+
+[
+ "["
+ "]"
+ "("
+ ")"
+ "{"
+ "}"
+ ] @punctuation.bracket
+
    ;; -------------------------------------------------------------------
-   ;; Module & Imports
+   ;; Module & Imports (Note module => type; definition => scope)
    ;; -------------------------------------------------------------------
 
    (module name: (identifier) @type.scope)
-
-   (import_statement [ "[" "]" ] @punctuation.bracket)
 
    (member_import name: (qualified_identifier) @type)
 
    (module_import name: (identifier) @type.scope)
 
    ;; -------------------------------------------------------------------
-   ;; Annotations and Constraints
+   ;; Annotations and Constraints (Note property => label)
    ;; -------------------------------------------------------------------
 
    (annotation_property
@@ -245,7 +253,8 @@
 
    (informal_constraint language: (controlled_language_tag) @property)
 
-   (environment_definition name: (identifier) @function.definition)
+   (environment_definition (identifier) @function.definition \. (function_def))
+   (environment_definition (identifier) @constant \. (constant_def))
 
    (function_signature target: (_) @type)
    (function_parameter name: (identifier) @variable.parameter)
@@ -253,63 +262,45 @@
 
    (constraint_environment (constraint_environment_end) @keyword)
 
-   (constraint_sentence [ "(" ")" ] @punctuation.bracket)
-
-   (name_path subject: (reserved_self) @keyword)
-   (name_path subject: (identifier) @function.call)
-   (name_path path: (identifier) @function.call)
-   (name_path "." @punctuation.delimiter)
-
-   (term (qualified_identifier) @type)
+   (function_composition name: (identifier) @function.call)
+   (function_composition "." @punctuation.delimiter)
 
    (functional_term function: (term (identifier) @function.call))
 
-   (functional_term arguments: (term (identifier) @variable))
-
-   (functional_term [ "(" ")" ] @punctuation.bracket)
+   (term (qualified_identifier) @type)
 
    (atomic_sentence predicate: (term (identifier) @function.call))
-
-   (atomic_sentence arguments: (term (identifier) @variable))
-
-   (atomic_sentence [ "(" ")" ] @punctuation.bracket)
 
    (equation lhs: (term (identifier) @variable))
 
    (equation rhs: (term (identifier) @variable))
 
-   (quantified_body [ "(" ")" ] @punctuation.bracket)
+   (quantifier_bound_names name: (identifier) @variable.parameter)
+   (quantifier_bound_names "," @punctuation.separator)
 
-   (quantifier_binding (reserved_self) @keyword)
-   (quantifier_binding name: (identifier) @variable)
+   (type_iterator source: (identifier_reference) @type)
 
-   (type_iterator from: (reserved_self_type) @keyword)
-   (type_iterator from: (identifier_reference) @type)
+   (sequence_builder [ "|" "," ] @punctuation.separator)
 
-   (sequence_iterator from: (identifier) @variable)
-
-   (sequence_builder
-    "{" @punctuation.bracket
-    "|" @punctuation.separator
-    "}" @punctuation.bracket)
-
-   (local_binding name: (identifier) @variable.special)
-
-   (tuple_variable (identifier) @variable)
-   (sequence_variable (identifier) @variable)
-   (mapping_variable domain: (identifier) range: (identifier) @variable)
-
-   (sequence_of_predicate_values [ "{" "}" ] @punctuation.bracket)
-   (sequence_of_predicate_values [ "[" "]" ] @punctuation.bracket)
    (sequence_of_predicate_values (identifier_reference) @type)
+
+   [
+    (reserved_self)
+    (reserved_self_type)
+    ] @variable.builtin
 
    ;; -------------------------------------------------------------------
    ;; Types
    ;; -------------------------------------------------------------------
 
+      [
+       (builtin_simple_type)
+       (unknown_type)
+       ] @type.builtin
+
    (data_type_def
     name: (identifier) @type
-    base: (data_type_base (identifier_reference) @type))
+    base: (identifier_reference) @type)
 
    (entity_def name: (identifier) @type)
 
@@ -323,25 +314,27 @@
 
    (union_def name: (identifier) @type)
 
+   (feature_set_def name: (identifier) @type)
+
    ;; -------------------------------------------------------------------
    ;; Members
    ;; -------------------------------------------------------------------
 
-   (identity_member name: (identifier) @variable)
-   (identity_member property: (identifier_reference) @variable.special)
+   (identity_member name: (identifier) @variable.field)
+   (identity_member property: (identifier_reference) @variable.field)
    (identity_member target: (type_reference) @type)
 
-   (member_by_value name: (identifier) @variable)
-   (member_by_value property: (identifier_reference) @variable.special)
+   (member_by_value name: (identifier) @variable.field)
+   (member_by_value property: (identifier_reference) @variable.field)
    (member_by_value target: (type_reference) @type)
 
-   (member_by_reference name: (identifier) @variable)
-   (member_by_reference property: (identifier_reference) @variable.special)
+   (member_by_reference name: (identifier) @variable.field)
+   (member_by_reference property: (identifier_reference) @variable.field)
    (member_by_reference target: (type_reference) @type)
 
    (member_inverse_name
     "(" @punctuation.bracket
-    (identifier) @variable
+    (identifier) @variable.field
     ")" @punctuation.bracket)
 
    (value_variant name: (identifier) @constant)
@@ -350,11 +343,7 @@
 
    (type_variant rename: (identifier) @type)
 
-   (cardinality_expression [ "{" "}" ] @punctuation.bracket)
-
-   (mapping_type [ "(" ")" ] @punctuation.bracket)
-
-   (property_def name: (identifier) @variable)
+   (property_def name: (identifier) @variable.field)
 
    (identity_role
     name: (identifier) @variable.field
@@ -372,13 +361,12 @@
    ;; Values
    ;; -------------------------------------------------------------------
 
-   (string
-    (quoted_string) @string)
+   (string (quoted_string) @string)
+   (string language: (language_tag) @property)
 
-   (string
-    language: (language_tag) @property)
+   (iri) @string.special
 
-   (iri_reference) @string.special
+   (binary) @string.special
 
    [
     (decimal)
@@ -389,17 +377,13 @@
 
    (boolean) @constant.builtin
 
-   (value_constructor
-    name: (identifier_reference) @function.special
-    [ "(" ")" ] @punctuation.bracket)
+   (value_constructor name: (identifier_reference) @function.call)
 
-    (value (identifier_reference) @type)
+   (value (identifier_reference) @type)
 
-    (sequence_of_values [ "{" "}" ] @punctuation.bracket)
-    (sequence_of_values [ "[" "]" ] @punctuation.bracket)
-    (sequence_of_values (identifier_reference) @type)
+   (sequence_of_values (identifier_reference) @type)
 
-    ;; -------------------------------------------------------------------
+   ;; -------------------------------------------------------------------
    ;; Errors
    ;; -------------------------------------------------------------------
 
@@ -433,6 +417,9 @@
                     structure_group
                     union_body
                     property_body
+                    feature_set_conjunctive_body
+                    feature_set_disjunctive_body
+                    feature_set_exclusive_disjunction_body
                     sequence_of_values
                     sequence_of_predicate_values
                     constraint
