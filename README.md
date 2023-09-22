@@ -11,8 +11,8 @@
     \  \::/ /:/    \  \:\/:/    \  \:\         \  \:\/:/ 
      \__\/ /:/      \  \::/      \  \:\         \  \::/ 
        /__/:/        \__\/        \  \:\         \__\/ 
-       \__\/          Domain       \__\/          Language
-        Simple                      Modeling
+       \__\/         (Domain)      \__\/         (Language)
+       (Simple)                    (Modeling)
 ```
 
 This package provides an Emacs tree-sitter based major mode for SDML - the
