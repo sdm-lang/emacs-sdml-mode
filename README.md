@@ -95,11 +95,11 @@ enabled by default with `window-system` is non-`nil`.
 
 To switch to left/right fringe (default is left-fringe):
 
-    (setq ts-fold-indicators-fringe 'right-fringe)`
+    (setq ts-fold-indicators-fringe 'right-fringe)
 
 To lower/higher the fringe overlay's priority (default is 30):
 
-`    (setq ts-fold-indicators-priority 30)`
+    (setq ts-fold-indicators-priority 30)
 
 ### Abbreviations and Skeletons
 
