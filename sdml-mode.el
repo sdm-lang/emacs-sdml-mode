@@ -31,8 +31,22 @@
 ;;; Commentary:
 
 ;;
-;; This package provides a tree-sitter based major mode for SDML - Simple
-;; Domain Modeling Language.
+;; This package provides a tree-sitter based major mode for SDML.
+
+;;
+;;         ___          _____          ___ 
+;;        /  /\        /  /::\        /__/\ 
+;;       /  /:/_      /  /:/\:\      |  |::\ 
+;;      /  /:/ /\    /  /:/  \:\     |  |:|:\    ___     ___ 
+;;     /  /:/ /::\  /__/:/ \__\:|  __|__|:|\:\  /__/\   /  /\ 
+;;    /__/:/ /:/\:\ \  \:\ /  /:/ /__/::::| \:\ \  \:\ /  /:/ 
+;;    \  \:\/:/~/:/  \  \:\  /:/  \  \:\~~\__\/  \  \:\  /:/ 
+;;     \  \::/ /:/    \  \:\/:/    \  \:\         \  \:\/:/ 
+;;      \__\/ /:/      \  \::/      \  \:\         \  \::/ 
+;;        /__/:/        \__\/        \  \:\         \__\/ 
+;;        \__\/          Domain       \__\/          Language
+;;         Simple                      Modeling
+;;
 
 ;;
 ;; Installing
@@ -64,6 +78,29 @@
 ;; `\\[ts-fold-open-all]' -- unfold all items in buffer
 ;; `\\[ts-fold-open-recursively]' -- unfold item and all children
 ;; `\\[ts-fold-toggle]' -- toggle fold/unfold state
+;;
+
+;; Abbreviations and Skeletons
+;;
+;; This package creates a new `abbrev-table', named `sdml-mode-abbrev-table', which
+;; provides a number of useful skeletons for the following. `abbrev-mode' is enabled
+;; by `sdml-mode' and when typing one of the abbreviations below type space to
+;; expand.
+;;
+;; Typing `d t SPC' will prompt for a name and expand into the SDML declaration
+;; `datatype MyName ← opaque _' where the underscore character represents the new
+;; cursor position.
+;;
+;; Declarations: `mo'=module, `dt'=datatype, `en'=enum, `ev'=event, `pr'=property,
+;;   `st'=structure, `un'=union
+;;
+;; Annotation Properties: `pal'=skos:altLabel, `pdf'=skos:definition,
+;;   `ped'=skos:editorialNote, `ppl'=skos:prefLabel, `pco'=rdfs:comment
+;;
+;; Constraints: `ci'=informal, `cf'=formal, `all'=universal, `any'=existential
+;;
+;; Datatypes: `db'=boolean, `dd'=decimal, `df'=double, `dh'=binary, `di'=integer,
+;;   `sd'=string, `du'=unsigned
 ;;
 
 ;; Fold Indicators
@@ -98,14 +135,14 @@
   :prefix "sdml-"
   :group 'languages)
 
-(defcustom sdml-indent-offset 2
+(defcustom sdml-mode-indent-offset 2
   "Number of spaces for each indentation step."
   :tag "Indentation number of spaces"
   :type 'natnum
   :group 'sdml)
 
-(defcustom sdml-prettify-symbols-alist
-  '(("->" . ?→) ("<-" . ?←))
+(defcustom sdml-mode-prettify-symbols-alist
+  '(("->" . ?→) ("<-" . ?←) ("forall" ?∀) ("exists" ?∃) ("in" ?∈) (":=" ?≔))
   "An alist of symbol prettifications used for `prettify-symbols-alist'."
   :tag "Symbol mapping for prettify"
   :type '(repeat (cons string character))
@@ -133,7 +170,7 @@
 ;; Syntax
 ;; --------------------------------------------------------------------------
 
-(defvar sdml-syntax-table
+(defvar sdml-mode-syntax-table
   (let ((table (make-syntax-table)))
     (modify-syntax-entry ?- ". 12b" table)
     table))
@@ -152,42 +189,24 @@
    (line_comment) @comment
 
    ;; -------------------------------------------------------------------
-   ;; Keywords
+   ;; Reserved Keywords
    ;; -------------------------------------------------------------------
 
    [
-    "and"
-    "as"
+    "module"
+    "import"
     "assert"
-    "base"
+    "class"
     "datatype"
-    "def"
-    "end"
     "entity"
     "enum"
     "event"
-    "exists"
-    "features"
-    "forall"
-    "group"
-    "identity"
-    "iff"
-    "implies"
-    "import"
-    "in"
-    "is"
-    "module"
-    "not"
-    "of"
-    "or"
     "property"
-    "ref"
-    "source"
     "structure"
     "union"
-    "xor"
-    (sequence_ordering)
-    (sequence_uniqueness)
+    "is"
+    "of"
+    "end"
     ] @keyword
 
    ;; -------------------------------------------------------------------
@@ -210,28 +229,20 @@
     "∃"
     "∈"
     "->"
+    "→"
     "<-"
+    "←"
     ".."
     ] @operator
-
-;; ----------------------------------------------------------------------
-;; Brackets
-;; ----------------------------------------------------------------------
-
-[
- "["
- "]"
- "("
- ")"
- "{"
- "}"
- ] @punctuation.bracket
 
    ;; -------------------------------------------------------------------
    ;; Module & Imports (Note module => type; definition => scope)
    ;; -------------------------------------------------------------------
 
    (module name: (identifier) @type.scope)
+   (module "base" @keyword)
+
+   (import_statement [ "[" "]" ] @punctuation.bracket)
 
    (member_import name: (qualified_identifier) @type)
 
@@ -250,87 +261,135 @@
    (constraint name: (identifier) @label)
 
    (informal_constraint (quoted_string) @embedded)
-
    (informal_constraint language: (controlled_language_tag) @property)
-
-   (environment_definition (identifier) @function.definition \. (function_def))
-   (environment_definition (identifier) @constant \. (constant_def))
-
-   (function_signature target: (_) @type)
-   (function_parameter name: (identifier) @variable.parameter)
-   (function_parameter target: (_) @type)
 
    (constraint_environment (constraint_environment_end) @keyword)
 
+   (environment_def "def" @keyword)
+   (environment_def (identifier) @function.definition \. (function_def))
+   (environment_def (identifier) @constant \. (constant_def))
+
+   (function_signature target: (_) @type)
+   (function_signature [ "(" ")" ] @punctuation.bracket)
+
+   (function_parameter name: (identifier) @variable.parameter)
+   (function_parameter target: (_) @type)
+
+   (optional) @operator
+
+   (function_cardinality_expression (sequence_ordering) @keyword)
+   (function_cardinality_expression (sequence_uniqueness) @keyword)
+   (function_cardinality_expression [ "{" "}" ] @punctuation.bracket)
+
+   (function_composition subject: (reserved_self) @variable.builtin)
    (function_composition name: (identifier) @function.call)
    (function_composition "." @punctuation.delimiter)
 
-   (functional_term function: (term (identifier) @function.call))
+   (constraint_sentence [ "(" ")" ] @punctuation.bracket)
 
-   (term (qualified_identifier) @type)
+   (atomic_sentence predicate: (term (identifier_reference) @function.call))
 
-   (atomic_sentence predicate: (term (identifier) @function.call))
+   (term (reserved_self) @variable.builtin)
 
-   (equation lhs: (term (identifier) @variable))
+   (actual_arguments [ "(" ")" ] @punctuation.bracket)
+   (actual_arguments argument: (term (identifier_reference (identifier) @variable)))
 
-   (equation rhs: (term (identifier) @variable))
+   (equation lhs: (term (identifier_reference) @variable))
 
-   (quantifier_bound_names name: (identifier) @variable.parameter)
-   (quantifier_bound_names "," @punctuation.separator)
+   (equation rhs: (term (identifier_reference) @variable))
 
-   (type_iterator source: (identifier_reference) @type)
+   (quantified_sentence "," @punctuation.separator)
 
-   (sequence_builder [ "|" "," ] @punctuation.separator)
+   (quantified_variable source: (reserved_self) @variable.builtin)
+   (quantified_variable name: (identifier) @variable.parameter)
+   (quantified_variable "in" @keyword)
 
-   (sequence_of_predicate_values (identifier_reference) @type)
+   (functional_term function: (term (identifier_reference) @function.call))
 
-   [
-    (reserved_self)
-    (reserved_self_type)
-    ] @variable.builtin
+   (sequence_builder "|" @punctuation.separator)
+   (sequence_builder [ "{" "}" ] @punctuation.bracket)
+
+   (named_variable_set (identifier) @variable)
+
+   (mapping_variable domain: (identifier) @variable range: (identifier) @variable)
+
+   (sequence_builder_body [ "(" ")" ] @punctuation.bracket)
+
+   (sequence_of_predicate_values [ "[" "]" ] @punctuation.bracket)
+
+   (negation "not" @keyword)
+   (conjunction "and" @keyword)
+   (disjunction "or" @keyword)
+   (exclusive_disjunction "xor" @keyword)
+   (implication "implies" @keyword)
+   (biconditional "iff" @keyword)
+
+   (universal "forall" @keyword)
+   (existential "exists" @keyword)
 
    ;; -------------------------------------------------------------------
    ;; Types
    ;; -------------------------------------------------------------------
 
-      [
-       (builtin_simple_type)
-       (unknown_type)
-       ] @type.builtin
+   [
+    (builtin_simple_type)
+    (unknown_type)
+    ] @type.builtin
 
-   (data_type_def
-    name: (identifier) @type
-    base: (identifier_reference) @type)
+   (data_type_def name: (identifier) @type)
+   (data_type_def base: (identifier_reference) @type)
+   (data_type_def opaque: (opaque) @keyword)
 
    (entity_def name: (identifier) @type)
 
    (enum_def name: (identifier) @type)
 
+   (event_def "source" @keyword)
    (event_def
     name: (identifier) @type
     source: (identifier_reference) @type)
 
    (structure_def name: (identifier) @type)
+   (member_group "group" @keyword)
 
    (union_def name: (identifier) @type)
 
-   (feature_set_def name: (identifier) @type)
+   ;; -------------------------------------------------------------------
+   ;; Type Classes
+   ;; -------------------------------------------------------------------
+
+   (type_class_def name: (identifier) @type)
+
+   (type_class_parameters [ "(" ")" ] @punctuation.bracket)
+
+   (type_variable name: (identifier) @type)
+
+   (type_variable_restriction "+" @operator)
+
+   (type_class_reference name: (identifier_reference) @type)
+
+   (type_class_arguments [ "(" ")" ] @punctuation.bracket)
+
+   (method_def "def" @keyword)
+   (method_def name: (identifier) @method)
+
+   (wildcard) @type.builtin
 
    ;; -------------------------------------------------------------------
    ;; Members
    ;; -------------------------------------------------------------------
 
-   (identity_member name: (identifier) @variable.field)
-   (identity_member property: (identifier_reference) @variable.field)
-   (identity_member target: (type_reference) @type)
+   (entity_identity "identity" @keyword)
+   (entity_identity name: (identifier) @variable.field)
+   (entity_identity property: (identifier_reference) @variable.field)
+   (entity_identity target: (type_reference) @type)
+   (entity_identity "in" @keyword)
 
-   (member_by_value name: (identifier) @variable.field)
-   (member_by_value property: (identifier_reference) @variable.field)
-   (member_by_value target: (type_reference) @type)
-
-   (member_by_reference name: (identifier) @variable.field)
-   (member_by_reference property: (identifier_reference) @variable.field)
-   (member_by_reference target: (type_reference) @type)
+   (member name: (identifier) @variable.field)
+   (member property: (identifier_reference) @variable.field)
+   (member target: (type_reference) @type)
+   (member feature: (feature_reference) @keyword)
+   (member "in" @keyword)
 
    (member_inverse_name
     "(" @punctuation.bracket
@@ -340,22 +399,24 @@
    (value_variant name: (identifier) @constant)
 
    (type_variant (identifier_reference) @type)
-
    (type_variant rename: (identifier) @type)
+   (type_variant "as" @keyword)
 
    (property_def name: (identifier) @variable.field)
 
+   (identity_role "identity" @keyword)
    (identity_role
     name: (identifier) @variable.field
     target: (type_reference) @type)
 
-   (role_by_value
+   (member_role
     name: (identifier) @variable.field
     target: (type_reference) @type)
+   (member_role feature: (feature_reference) @keyword)
 
-   (role_by_reference
-    name: (identifier) @variable.field
-    target: (type_reference) @type)
+   (cardinality_expression (sequence_ordering) @keyword)
+   (cardinality_expression (sequence_uniqueness) @keyword)
+   (cardinality_expression [ "{" "}" ] @punctuation.bracket)
 
    ;; -------------------------------------------------------------------
    ;; Values
@@ -378,10 +439,12 @@
    (boolean) @constant.builtin
 
    (value_constructor name: (identifier_reference) @function.call)
+   (value_constructor [ "(" ")" ] @punctuation.bracket)
 
    (value (identifier_reference) @type)
 
    (sequence_of_values (identifier_reference) @type)
+   (sequence_of_values  [ "[" "]" ] @punctuation.bracket)
 
    ;; -------------------------------------------------------------------
    ;; Errors
@@ -402,13 +465,7 @@
 ;; package-lint.
 (defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
-    (indent-all . ())
-
-    ;; If parent node is one of this and node is not first → indent
-    (indent-rest . ())
-
-    ;; If parent node is one of this and current node is in middle → indent
-    (indent-body . (module_body
+    (indent-all . (module_body
                     annotation_only_body
                     entity_body
                     entity_group
@@ -417,13 +474,23 @@
                     structure_group
                     union_body
                     property_body
+                    type_class_body
                     feature_set_conjunctive_body
                     feature_set_disjunctive_body
                     feature_set_exclusive_disjunction_body
-                    sequence_of_values
+                    function_body))
+
+    ;; If parent node is one of this and current node is not first → indent
+    (indent-rest . ())
+
+    ;; If parent node is one of this and current node is in middle → indent
+    (indent-body . (sequence_of_values
                     sequence_of_predicate_values
                     constraint
-                    formal_constraint))
+                    formal_constraint
+                    environment_def
+                    function_signature
+                    actual_arguments))
 
     ;; If parent node is one of these → indent to paren opener
     (paren-indent . (universal
@@ -435,7 +502,8 @@
     ;; Siblings (nodes with same parent) should be aligned to the first child
     (aligned-siblings . (value_variant
                          type_variant
-                         environment_definition))
+                         environment_def
+                         method_def))
 
     ;; if node is one of this, then don't modify the indent
     ;; this is basically a peaceful way out by saying "this looks like something
@@ -458,22 +526,25 @@
       (enum_def . (ts-fold-range-seq 3 2))
       (event_def . (ts-fold-range-seq 4 2))
       (structure_def . (ts-fold-range-seq 8 2))
+      (type_class_def . (ts-fold-range-seq 4 2))
       (union_def . (ts-fold-range-seq 4 2))
       (property_def . (ts-fold-range-seq 7 2))
       ;; bodies
       (annotation_only_body . (ts-fold-range-seq 1 -2))
       (entity_body . (ts-fold-range-seq 1 -2))
       (enum_body . (ts-fold-range-seq 1 -2))
-      (structure_body . (ts-fold-range-seq 1 -2))
-      (union_body . (ts-fold-range-seq 1 -2))
       (property_body . (ts-fold-range-seq 1 -2))
+      (structure_body . (ts-fold-range-seq 1 -2))
+      (type_class_body . (ts-fold-range-seq 1 -2))
+      (union_body . (ts-fold-range-seq 1 -2))
       ;; groups
-      (entity_group . (ts-fold-range-seq 4 -2))
-      (structure_group . (ts-fold-range-seq 4 -2))
-      ;; values
-      (list_of_values . ts-fold-range-seq)
+      (member_group . (ts-fold-range-seq 4 -2))
       ;; Constraints
       (constraint . (ts-fold-range-seq 5 2))
+      (sequence_builder . ts-fold-range-seq)
+      ;; values
+      (sequence_of_values . ts-fold-range-seq)
+      (sequence_of_predicate_values . ts-fold-range-seq)
       ;; comments
       (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
 
@@ -501,90 +572,158 @@
 ;; --------------------------------------------------------------------------
 
 (define-skeleton sdml-mode--new-module
-  "New module." nil
-  > "module " _ " is" \n
-  > "end")
+  "New module."
+  "Module name: "
+  > "module " str | "new_module"
+  > " base <https://example.org/vocabulary/" str | "new_module" "> is" \n
+  > "" \n
+  > "  import [ dc skos rdfs xsd ]" \n
+  > "" \n
+  > "  @skos:prefLabel = \"" str | "new_module" "\"@en" \n
+  > "  @dc:version = xsd:integer(1)" \n
+  > "" \n
+  > "  " _ \n
+  > "" \n
+  > "end" \n)
+
+(define-skeleton sdml-mode--new-datatype
+  "New datatype."
+  "Datatype name: "
+  > "datatype " str | "NewDatatype" " ← opaque " _ \n)
 
 (define-skeleton sdml-mode--new-entity
-  "New entity." nil
-  > "entity " _ " is" \n
-  > "  identity id -> unknown" \n
-  > "" \n
-  > "end")
+  "New entity."
+  "Entity name: "
+  > "entity " str | "NewEntity" " is" \n
+  > "  identity id → unknown" \n
+  > "  " _ \n
+  > "end" \n)
 
 (define-skeleton sdml-mode--new-structure
-  "New structure." nil
-  > "structure " _ " is" \n
-  > "" \n
-  > "end")
+  "New structure."
+  "Structure name: "
+  > "structure " str | "NewStructure" " is" \n
+  > "  name → Type" \n
+  > "  " _ \n
+  > "end" \n)
+
+(define-skeleton sdml-mode--new-property
+  "New property."
+  "Property name: "
+  > "property " str | "NewProperty" " is" \n
+  > "  role_name → Type" \n
+  > "  " _ \n
+  > "end" \n)
 
 (define-skeleton sdml-mode--new-event
-  "New event." nil
-  > "event " _ " source Entity is" \n
+  "New event."
+  "Event name: "
+  > "event " str | "NewEvent" " source " _ " is" \n
+  > "  name → Type" \n
   > "" \n
-  > "end")
+  > "end" \n)
 
 (define-skeleton sdml-mode--new-enum
-  "New enum." nil
-  > "enum " _ " of" \n
-  > "  VariantOne = 1" \n
-  > "  VariantTwo = 2" \n
-  > "end")
+  "New enum."
+  "Enum name: "
+  > "enum " str | "NewEnum" " of" \n
+  > "  ValueOne" \n
+  > "  " _ \n
+  > "end" \n)
 
 (define-skeleton sdml-mode--new-union
-  "New discriminated union." nil
-  > "union " _ " of" \n
-  > "  TypeOne" \n
-  > "  TypeTwo" \n
-  > "end")
+  "New discriminated union."
+  "Union name: "
+  > "union " str | "NewUnion" " of" \n
+  > "  TypeOne as One" \n
+  > "  " _ \n
+  > "end" \n)
 
 (define-skeleton sdml-mode--new-constraint
-  "New informal constraint." nil
-  > "assert " _ " = \"\"")
+  "New informal constraint."
+  "Constraint name: "
+  > "assert " str | "invariant" " = \"" _ "\"" \n)
 
 (define-skeleton sdml-mode--new-formal-constraint
-  "New formal constraint." nil
-  > "assert " _ " is" \n
-  > "  forall self (" \n
-  > "    ⊤" \n
-  > "  )" \n
-  > "end")
+  "New formal constraint."
+  "Constraint name: "
+  > "assert " str | "invariant" " is" \n
+  > "  ∀ self, " _ \n
+  > "end" \n)
+
+;; --------------------------------------------------------------------------
 
 (define-skeleton sdml-mode--new-constraint-def
-  "New formal constraint definition." nil
-  > "def " _ "() := ")
+  "New formal constraint definition."
+  "Definition name: "
+  > "def " str | "defn" "() ≔ " _ \n)
 
 (define-skeleton sdml-mode--new-constraint-forall
-  "New formal constraint definition." nil
-  > "forall " _ " ()")
+  "Universal quantified sentence."
+  "Variable name: "
+  > "∀ " str | "self" ", " _ \n)
 
 (define-skeleton sdml-mode--new-constraint-exists
-  "New formal constraint definition." nil
-  > "exists " _ " ()")
+  "Existential quantified sentence."
+  "Variable name: "
+  > "∃ " str | "self" ", " _ \n)
 
-(define-skeleton sdml-mode--new-label
-  "New SKOS preferred label." nil
-  > "@skos:prefLabel " _ " = \"\"@en")
+;; --------------------------------------------------------------------------
 
-(define-abbrev-table 'sdml-abbrev-table
-  '(("uk" "-> unknown")
-    ("mod" "" 'sdml-mode--new-module)
-    ("ent" "" 'sdml-mode--new-entity)
-    ("enu" "" 'sdml-mode--new-enum)
-    ("evt" "" 'sdml-mode--new-event)
-    ("str" "" 'sdml-mode--new-structure)
-    ("uni" "" 'sdml-mode--new-union)
-    ("ass" "" 'sdml-mode--new-constraint)
-    ("fass" "" 'sdml-mode--new-formal-constraint)
-    ("lbl" "" 'sdml-mode--new-label)
-    ("all" "" 'sdml-mode--new-constraint-forall)
-    ("any" "" 'sdml-mode--new-constraint-exists)
+(define-skeleton sdml-mode--new-ann-altlabel
+  "SKOS alternate label." nil
+  > "@skos:altLabel = \"" _ "\"@en" \n)
+
+(define-skeleton sdml-mode--new-ann-definition
+  "SKOS definition." nil
+  > "@skos:definition = \"" _ "\"@en" \n)
+
+(define-skeleton sdml-mode--new-ann-editorial
+  "SKOS editorial note." nil
+  > "@skos:editorialNote = \"" _ "\"@en" \n)
+
+(define-skeleton sdml-mode--new-ann-preflabel
+  "SKOS preferred label." nil
+  > "@skos:prefLabel = \"" _ "\"@en" \n)
+
+(define-skeleton sdml-mode--new-ann-comment
+  "RDFS comment." nil
+  > "@rdfs:comment = \"" _ "\"@en" \n)
+
+;; --------------------------------------------------------------------------
+
+;; Note you still need a replacement string "" when using
+;;      skeletons or the original text isn't removed.
+(define-abbrev-table 'sdml-mode-abbrev-table
+  '(;; Declaration - Types
+    ("mo" "" sdml-mode--new-module)
+    ("dt" "" sdml-mode--new-datatype)
+    ("en" "" sdml-mode--new-enum)
+    ("ev" "" sdml-mode--new-event)
+    ("pr" "" sdml-mode--new-property)
+    ("st" "" sdml-mode--new-structure)
+    ("un" "" sdml-mode--new-union)
+    ;; Declaration - Members
+    ;; Annotation - Constraints
+    ("ci" "" sdml-mode--new-constraint)
+    ("cf" "" sdml-mode--new-formal-constraint)
+    ("all" "" sdml-mode--new-constraint-forall)
+    ("any" "" sdml-mode--new-constraint-exists)
+    ;; Annotation - Properties
+    ("pal" "" sdml-mode--new-ann-altlabel)
+    ("ppl" "" sdml-mode--new-ann-preflabel)
+    ("pdf" "" sdml-mode--new-ann-definition)
+    ("ped" "" sdml-mode--new-ann-editorial)
+    ("pco" "" sdml-mode--new-ann-comment)
+    ;; data types
+    ("uk" "-> unknown")
     ("db" "boolean")
     ("dd" "decimal")
     ("df" "double")
+    ("dh" "binary")
     ("di" "integer")
-    ("di" "iri")
-    ("ds" "string")))
+    ("ds" "string")
+    ("du" "unsigned")))
 
 ;; --------------------------------------------------------------------------
 ;; Mode Definition
@@ -618,9 +757,9 @@
 
   :group 'sdml
 
-  :syntax-table sdml-syntax-table
+  :syntax-table sdml-mode-syntax-table
 
-  :abbrev-table sdml-abbrev-table
+  :abbrev-table sdml-mode-abbrev-table
 
   ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
@@ -632,7 +771,7 @@
   (setq-local comment-multi-line t)
 
   ;; Prettify (prettify-symbols-mode)
-  (setq prettify-symbols-alist sdml-prettify-symbols-alist)
+  (setq prettify-symbols-alist sdml-mode-prettify-symbols-alist)
   (prettify-symbols-mode)
 
   (abbrev-mode)
@@ -651,7 +790,8 @@
     ;; The package `ts-fold' must be installed and required PRIOR to this
     ;; package if you want to enable folding.
 
-    (add-to-list 'ts-fold-range-alist `(sdml-mode . ,sdml-mode-folding-definitions))
+    (add-to-list 'ts-fold-range-alist
+                 `(sdml-mode . ,sdml-mode-folding-definitions))
     (ts-fold-mode)
     (ts-fold-line-comment-mode)
 

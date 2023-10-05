@@ -19,11 +19,11 @@ This package provides an Emacs tree-sitter based major mode for SDML - the
 [Simple Domain Modeling Language](https://github.com/johnstonskj/tree-sitter-sdml).
 
 
-# Installing
+## Installing
 
 Currently the package is not published and so installation has to be done manually.
 
-## Install manually
+### Install manually
 
 First clone the Git repository to a local path.
 
@@ -58,12 +58,12 @@ Finally copy the dynamic library to a location in the path specified by the Emac
 > cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
 ```
 
-# Usage
+## Usage
 
 Once installed the major mode should be used for any file ending in `.sdm` or `.sdml` with highlighting and indentation
 support.
 
-## Highlighting
+### Highlighting
 
 Syntax highlighting is provided by the `tree-sitter-hl-mode` minor mode based on the configuration in the constant
 `sdml-mode-tree-sitter-hl-patterns`.
@@ -71,14 +71,14 @@ Syntax highlighting is provided by the `tree-sitter-hl-mode` minor mode based on
 The `sdml-mode` also adds to the `prettify-symbols-alist` list, the set of symbols is in the custom variable
 `sdml-prettify-symbols-alist`.
 
-## Indentation
+### Indentation
 
 Line indentation is provided by the `tree-sitter-indent-mode` minor mode based on the configuration in the constant
 `sdml-mode-folding-definitions`.
 
 Default indentation is two spaces, although this can be overridden by the custom variable `sdml-indent-offset`.
 
-## Code Folding
+### Code Folding
 
 Block Folding is provided by the `ts-fold-mode` minor mode based on the configuration in the constant
 `tree-sitter-indent-sdml-scopes`. Note that folding of groups of line comments is also supported.
@@ -90,10 +90,34 @@ Block Folding is provided by the `ts-fold-mode` minor mode based on the configur
 * `C-c C-s /` -- unfold item and all children
 * `C-c C-s .` -- toggle fold/unfold state
 
-As well as the mechanics of folding, the `ts-fold` package also has indicator support for windowed clients and this is
-enabled by default with `window-system` is non-nil.
+As well as the mechanics of folding, the `ts-fold` package also has a fringe indicator support for windowed clients and this is
+enabled by default with `window-system` is non-`nil`.
 
-## Debugging
+To switch to left/right fringe (default is left-fringe):
+
+    (setq ts-fold-indicators-fringe 'right-fringe)`
+
+To lower/higher the fringe overlay's priority (default is 30):
+
+`    (setq ts-fold-indicators-priority 30)`
+
+### Abbreviations and Skeletons
+
+This package creates a new `abbrev-table`, named `sdml-mode-abbrev-table`, which provides a number of useful skeletons for
+the following. `abbrev-mode` is enabled by `sdml-mode` and when typing one of the abbreviations below type space to expand.
+
+Typing `d t SPC` will prompt for a name and expand into the SDML declaration `datatype MyName ← opaque _` where the
+underscore character represents the new cursor position.
+
+**Declarations**: `mo`=module, `dt`=datatype, `en`=enum, `ev`=event, `pr`=property, `st`=structure, `un`=union
+
+**Annotation Properties**: `pal`=skos:altLabel, `pdf`=skos:definition, `ped`=skos:editorialNote, `ppl`=skos:prefLabel, `pco`=rdfs:comment
+
+**Constraints**: `ci`=informal, `cf`=formal, `all`=universal, `any`=existential
+
+**Datatypes**: `db`=boolean, `dd`=decimal, `df`=double, `dh`=binary, `di`=integer, `sd`=string, `du`=unsigned
+
+### Debugging
 
 * `C-c C-s d` -- open the tree-sitter debug view
 * `C-c C-s q` -- open the tree-sitter query builder
@@ -117,7 +141,7 @@ The additional package `sdml-ispell` provides *selective* spell checking by only
 By default only strings and comments are checked, although this can be overridden by the custom variable
 `tree-sitter-ispell-sdml-text-mapping`.
 
-## Flycheck
+### Flycheck
 
 The additional package `flycheck-sdml` provides on-the-fly linting for SDML buffers.
 
@@ -141,7 +165,7 @@ setting `flycheck-mode` for all SDML files with a hook.
 
 The entire set of lint rules are stored in the custom variable `sdml-lint-rules`.
 
-## Org-Babel
+### Org-Babel
 
 Org-Babel support provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
 produce diagrams and more. For example, the following source block calls the CLI to draw a concept diagram for the
@@ -172,13 +196,11 @@ The results block then references the resulting image.
 #+CAPTION: Rentals Concepts
 #+RESULTS: lst:rentals-example
 [[file:./rentals-concepts.svg]]
-
 ```
 
 But, what if we want to produce more than one diagram from the same source? By using the built-in
-/[[https://orgmode.org/manual/Noweb-Reference-Syntax.html][noweb]]/ syntax we can create a new source block, but
-reference the original content. This source block has different command-line parameters and has it's own results block
-as well.
+/[noweb](https://orgmode.org/manual/Noweb-Reference-Syntax.html)/ syntax we can create a new source block, but reference
+the original content. This source block has different command-line parameters and has it's own results block as well.
 
 ```
 #+NAME: fig:rentals-example-erd
@@ -187,7 +209,7 @@ as well.
 #+END_SRC
 ```
 
-# Contributing
+## Contributing
 
 The packages in this repository should pass the standard package checks, including:
 
@@ -209,6 +231,6 @@ __:0: error: "tree-sitter-indent-sdml-scopes" doesn't start with package's prefi
 ```
 
 
-# Changes
+## Changes
 
 TBD

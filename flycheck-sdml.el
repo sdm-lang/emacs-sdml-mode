@@ -94,19 +94,24 @@
               "((annotation_property value: (value (sequence_of_values (simple_value (string) @value)))) (#eq? @value \"\\\"\\\"\"))"))
     ;; ----------------------------------------------------------------------
     (types-missing-bodies
-     "Incomplete type definition"
+     "Incomplete type definition, no body specified"
      info
      "[(entity_def !body) (structure_def !body) (event_def !body) (enum_def !body) (union_def !body)] @type")
     ;; ----------------------------------------------------------------------
-    (member-by-value-target-cardinality
+    (members-using-unknown
+     "Incomplete member definition, using unknown type"
+     info
+     "(type_reference (unknown_type) @type)")
+    ;; ----------------------------------------------------------------------
+    (member-unrestricted-types
+     "It's bad form to use unrestricted simple types"
+     info
+     "(type_reference (builtin_simple_type) @type)")
+    ;; ----------------------------------------------------------------------
+    (member-cardinality
      "By-value member cardinality is the default and may be removed"
      info
-     "((member_by_value cardinality: (cardinality_expression) @card) (#eq? @card \"{1..}\"))")
-    ;; ----------------------------------------------------------------------
-    (member-by-ref-target-cardinality
-     "By-reference member target cardinality is the default and may be removed"
-     info
-     "((member_by_reference cardinality: (cardinality_expression) @card) (#eq? @card \"{0..}\"))"))
+     "((member cardinality: (cardinality_expression) @card) (#eq? @card \"{1..}\"))"))
   "SDML lint rules for Flycheck, these use tree-sitter queries to select issues."
   :tag "Lint rules for Flycheck."
   :type '(repeat (list (symbol :tag "Identifier")
