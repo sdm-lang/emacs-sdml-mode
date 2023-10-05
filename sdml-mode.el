@@ -579,7 +579,7 @@
   > "" \n
   > "  import [ dc skos rdfs xsd ]" \n
   > "" \n
-  > "  @skos:prefLabel = \"" str | "new_module" "\"@en" \n
+  > "  @skos:prefLabel = \"" str | "new_module" "\"@" locale-language \n
   > "  @dc:version = xsd:integer(1)" \n
   > "" \n
   > "  " _ \n
@@ -642,7 +642,7 @@
 (define-skeleton sdml-mode--new-constraint
   "New informal constraint."
   "Constraint name: "
-  > "assert " str | "invariant" " = \"" _ "\"" \n)
+  > "assert " str | "invariant" " = \"" _ "\"@" locale-language \n)
 
 (define-skeleton sdml-mode--new-formal-constraint
   "New formal constraint."
@@ -672,23 +672,23 @@
 
 (define-skeleton sdml-mode--new-ann-altlabel
   "SKOS alternate label." nil
-  > "@skos:altLabel = \"" _ "\"@en" \n)
+  > "@skos:altLabel = \"" _ "\"@" locale-language \n)
 
 (define-skeleton sdml-mode--new-ann-definition
   "SKOS definition." nil
-  > "@skos:definition = \"" _ "\"@en" \n)
+  > "@skos:definition = \"" _ "\"@" locale-language \n)
 
 (define-skeleton sdml-mode--new-ann-editorial
   "SKOS editorial note." nil
-  > "@skos:editorialNote = \"" _ "\"@en" \n)
+  > "@skos:editorialNote = \"" _ "\"@" locale-language \n)
 
 (define-skeleton sdml-mode--new-ann-preflabel
   "SKOS preferred label." nil
-  > "@skos:prefLabel = \"" _ "\"@en" \n)
+  > "@skos:prefLabel = \"" _ "\"@" locale-language \n)
 
 (define-skeleton sdml-mode--new-ann-comment
   "RDFS comment." nil
-  > "@rdfs:comment = \"" _ "\"@en" \n)
+  > "@rdfs:comment = \"" _ "\"@" locale-language \n)
 
 ;; --------------------------------------------------------------------------
 

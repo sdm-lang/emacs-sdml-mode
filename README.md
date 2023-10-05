@@ -117,6 +117,9 @@ underscore character represents the new cursor position.
 
 **Datatypes**: `db`=boolean, `dd`=decimal, `df`=double, `dh`=binary, `di`=integer, `sd`=string, `du`=unsigned
 
+Note that for annotation properties with language string values the skeletons will add the value of the Emacs
+variable `locale-language` as the language tag.
+
 ### Debugging
 
 * `C-c C-s d` -- open the tree-sitter debug view
