@@ -3,7 +3,7 @@
 ;; Copyright (c) 2023 Simon Johnston
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.5
+;; Version: 0.1.6
 ;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
@@ -135,13 +135,13 @@
   :prefix "sdml-"
   :group 'languages)
 
-(defcustom sdml-mode-indent-offset 2
+(defcustom sdml-indent-offset 2
   "Number of spaces for each indentation step."
   :tag "Indentation number of spaces"
   :type 'natnum
   :group 'sdml)
 
-(defcustom sdml-mode-prettify-symbols-alist
+(defcustom sdml-prettify-symbols-alist
   '(("->" . ?→) ("<-" . ?←) ("forall" ?∀) ("exists" ?∃) ("in" ?∈) (":=" ?≔))
   "An alist of symbol prettifications used for `prettify-symbols-alist'."
   :tag "Symbol mapping for prettify"
@@ -287,12 +287,14 @@
 
    (constraint_sentence [ "(" ")" ] @punctuation.bracket)
 
-   (atomic_sentence predicate: (term (identifier_reference) @function.call))
-
-   (term (reserved_self) @variable.builtin)
+   (atomic_sentence
+    predicate: (term (identifier_reference) @function.call))
 
    (actual_arguments [ "(" ")" ] @punctuation.bracket)
-   (actual_arguments argument: (term (identifier_reference (identifier) @variable)))
+   (actual_arguments
+    argument: (term (identifier_reference (identifier) @variable)))
+
+   (term (reserved_self) @variable.builtin)
 
    (equation lhs: (term (identifier_reference) @variable))
 
@@ -304,17 +306,20 @@
    (quantified_variable name: (identifier) @variable.parameter)
    (quantified_variable "in" @keyword)
 
-   (functional_term function: (term (identifier_reference) @function.call))
+   (functional_term
+    function: (term (identifier_reference) @function.call))
 
-   (sequence_builder "|" @punctuation.separator)
-   (sequence_builder [ "{" "}" ] @punctuation.bracket)
+   (sequence_builder [ "{" "}" ] @punctuation.bracket
+                     "|" @punctuation.separator)
 
    (named_variable_set (identifier) @variable)
 
-   (mapping_variable domain: (identifier) @variable range: (identifier) @variable)
+   (mapping_variable
+    domain: (identifier) @variable range: (identifier) @variable)
 
    (sequence_builder_body [ "(" ")" ] @punctuation.bracket)
 
+   (sequence_of_predicate_values (identifier_reference) @type)
    (sequence_of_predicate_values [ "[" "]" ] @punctuation.bracket)
 
    (negation "not" @keyword)
@@ -388,7 +393,10 @@
    (member name: (identifier) @variable.field)
    (member property: (identifier_reference) @variable.field)
    (member target: (type_reference) @type)
-   (member feature: (feature_reference) @keyword)
+   (member
+    feature: (feature_reference
+              "features" @keyword
+              target: (identifier_reference) @type))
    (member "in" @keyword)
 
    (member_inverse_name
@@ -465,45 +473,49 @@
 ;; package-lint.
 (defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
-    (indent-all . (module_body
-                    annotation_only_body
-                    entity_body
-                    entity_group
-                    enum_body
-                    structure_body
-                    structure_group
-                    union_body
-                    property_body
-                    type_class_body
-                    feature_set_conjunctive_body
-                    feature_set_disjunctive_body
-                    feature_set_exclusive_disjunction_body
-                    function_body))
+    (indent-all . (member
+                   member_group
+                   entity_identity
+                   function_body
+                   constant_def
+                   informal_constraint
+                   constraint_sentence))
 
     ;; If parent node is one of this and current node is not first → indent
     (indent-rest . ())
 
     ;; If parent node is one of this and current node is in middle → indent
-    (indent-body . (sequence_of_values
+    (indent-body . (module_body
+                    import_statement
+                    annotation_only_body
+                    ;; entity_body << this double indents.
+                    enum_body
+                    property_body
+                    structure_body
+                    union_body
+                    type_class_body
+                    function_body
+                    entity_identity
+                    member_group
+                    sequence_of_values
                     sequence_of_predicate_values
+                    sequence_builder
+                    sequence_builder_body
                     constraint
+                    informal_constraint
                     formal_constraint
-                    environment_def
+                    constraint_sentence
                     function_signature
                     actual_arguments))
 
     ;; If parent node is one of these → indent to paren opener
-    (paren-indent . (universal
-                     existential))
+    (paren-indent . ())
 
     ;; Chaining char → node types we move parentwise to find the first chaining char
     (align-char-to . ())
 
     ;; Siblings (nodes with same parent) should be aligned to the first child
-    (aligned-siblings . (value_variant
-                         type_variant
-                         environment_def
-                         method_def))
+    (aligned-siblings . ())
 
     ;; if node is one of this, then don't modify the indent
     ;; this is basically a peaceful way out by saying "this looks like something
@@ -525,10 +537,10 @@
       (entity_def . (ts-fold-range-seq 5 2))
       (enum_def . (ts-fold-range-seq 3 2))
       (event_def . (ts-fold-range-seq 4 2))
+      (property_def . (ts-fold-range-seq 7 2))
       (structure_def . (ts-fold-range-seq 8 2))
       (type_class_def . (ts-fold-range-seq 4 2))
       (union_def . (ts-fold-range-seq 4 2))
-      (property_def . (ts-fold-range-seq 7 2))
       ;; bodies
       (annotation_only_body . (ts-fold-range-seq 1 -2))
       (entity_body . (ts-fold-range-seq 1 -2))
@@ -771,7 +783,7 @@
   (setq-local comment-multi-line t)
 
   ;; Prettify (prettify-symbols-mode)
-  (setq prettify-symbols-alist sdml-mode-prettify-symbols-alist)
+  (setq prettify-symbols-alist sdml-prettify-symbols-alist)
   (prettify-symbols-mode)
 
   (abbrev-mode)

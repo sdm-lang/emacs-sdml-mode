@@ -28,7 +28,7 @@ Currently the package is not published and so installation has to be done manual
 First clone the Git repository to a local path.
 
 ```bash
-> git clone https://github.com/johnstonskj/emacs-sdml-mode.git
+    git clone https://github.com/johnstonskj/emacs-sdml-mode.git
 ```
 
 The following uses `use-package` but any equivalent package manager should work. The function `sdml-mode-setup` ensures
@@ -43,19 +43,19 @@ the installation of the SDML parser with the core `tree-sitter` package.
 Additionally you will need to manually install the parser at this time. Start by cloning the repository.
 
 ```bash
-> git clone https://github.com/johnstonskj/tree-sitter-sdml.git
+    git clone https://github.com/johnstonskj/tree-sitter-sdml.git
 ```
 
 Build just the parser dynamic library, but importantly you need to select a specific ABI version.
 
 ```bash
-> TS_GENERATE_ABI=13 make build_parser
+    TS_GENERATE_ABI=13 make build_parser
 ```
 
 Finally copy the dynamic library to a location in the path specified by the Emacs variable `tree-sitter-load-path`.
 
 ```bash
-> cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
+    cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
 ```
 
 ## Usage
@@ -236,4 +236,4 @@ __:0: error: "tree-sitter-indent-sdml-scopes" doesn't start with package's prefi
 
 ## Changes
 
-TBD
+The `0.1.x` series are all pre-release and do not appear in ELPA/MELPA.
