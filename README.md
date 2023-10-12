@@ -71,6 +71,8 @@ Syntax highlighting is provided by the `tree-sitter-hl-mode` minor mode based on
 The `sdml-mode` also adds to the `prettify-symbols-alist` list, the set of symbols is in the custom variable
 `sdml-prettify-symbols-alist`.
 
+![Syntax Highlighting](./images/emacs-editing.png)
+
 ### Indentation
 
 Line indentation is provided by the `tree-sitter-indent-mode` minor mode based on the configuration in the constant
@@ -171,7 +173,11 @@ The entire set of lint rules are stored in the custom variable `sdml-lint-rules`
 ### Org-Babel
 
 Org-Babel support provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
-produce diagrams and more. For example, the following source block calls the CLI to draw a concept diagram for the
+produce diagrams and more.
+
+![Syntax Highlighting](./images/emacs-org-mode.png)
+
+For example, the following source block calls the CLI to draw a concept diagram for the
 enclosed module.
 
 ```
