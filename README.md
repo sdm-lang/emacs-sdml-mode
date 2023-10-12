@@ -1,4 +1,4 @@
-# Emacs SDML Mode
+# SDML Mode for Emacs
 
 ```
         ___          _____          ___ 
