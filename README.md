@@ -1,19 +1,6 @@
 # SDML Mode for Emacs
 
-```
-        ___          _____          ___ 
-       /  /\        /  /::\        /__/\ 
-      /  /:/_      /  /:/\:\      |  |::\ 
-     /  /:/ /\    /  /:/  \:\     |  |:|:\    ___     ___ 
-    /  /:/ /::\  /__/:/ \__\:|  __|__|:|\:\  /__/\   /  /\ 
-   /__/:/ /:/\:\ \  \:\ /  /:/ /__/::::| \:\ \  \:\ /  /:/ 
-   \  \:\/:/~/:/  \  \:\  /:/  \  \:\~~\__\/  \  \:\  /:/ 
-    \  \::/ /:/    \  \:\/:/    \  \:\         \  \:\/:/ 
-     \__\/ /:/      \  \::/      \  \:\         \  \::/ 
-       /__/:/        \__\/        \  \:\         \__\/ 
-       \__\/         (Domain)      \__\/         (Language)
-       (Simple)                    (Modeling)
-```
+![SDML Logo Text](https://raw.githubusercontent.com/sdm-lang/.github/main/profile/horizontal-text.svg)
 
 This package provides an Emacs tree-sitter based major mode for SDML - the
 [Simple Domain Modeling Language](https://github.com/johnstonskj/tree-sitter-sdml).
@@ -239,6 +226,10 @@ __:0: error: "tree-sitter-indent-sdml-scopes" doesn't start with package's prefi
 
 ```
 
+
+## License
+
+This package is released under the Apache License, Version 2.0. See LICENSE file for details.
 
 ## Changes
 
