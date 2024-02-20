@@ -125,6 +125,9 @@
 (require 'tree-sitter-hl) ;; included in above
 (require 'tree-sitter-indent)
 
+(require 'ansi-color)
+(require 'compile)
+
 ;; --------------------------------------------------------------------------
 ;; Customization
 ;; --------------------------------------------------------------------------
@@ -148,9 +151,60 @@
   :type '(repeat (cons string character))
   :group 'sdml)
 
+(defcustom sdml-cli-name "sdml"
+  "The name of the command-line tool to use for SDML actions."
+  :tag "CLI tool name"
+  :type 'string
+  :group 'sdml)
+
+(defcustom sdml-cli-log-filter 'none
+  "The level of log information to emit from the command-line tool."
+  :tag "Logging filter level"
+  :type '(choice (const :tag "None" none)
+                 (const :tag "Errors" errors)
+                 (const :tag "Warnings" warnings)
+                 (const :tag "Information" information)
+                 (const :tag "Debugging" debugging)
+                 (const :tag "Tracing" tracing))
+  :group 'sdml)
+
+(defcustom sdml-cli-validation-level 'warnings
+  "The level of information to provide during validation."
+  :tag "Validation level"
+  :type '(choice (const :tag "None" none)
+                 (const :tag "Bugs" bugs)
+                 (const :tag "Errors" errors)
+                 (const :tag "Warnings" warnings)
+                 (const :tag "Notes" notes)
+                 (const :tag "Help" help)
+                 (const :tag "All" all))
+  :group 'sdml)
+
+(defcustom sdml-load-path nil
+  "A list of directories to be used as the `SDML_PATH' variable value."
+  :tag "CLI load path"
+  :type '(repeat directory)
+  :group 'sdml)
+
 
 ;; --------------------------------------------------------------------------
-;; Additional Faces
+;; Tree-Sitter  Library
+;; --------------------------------------------------------------------------
+
+(defun sdml--tree-sitter-setup (&optional dylib-file)
+  "Load and connect the parser library in DYLIB-FILE."
+  (unless (assoc 'sdml tree-sitter-languages)
+    ;; Load the dynamic library from the search path.
+    (tree-sitter-load 'sdml dylib-file))
+
+  (unless (assoc 'sdml-mode tree-sitter-major-mode-language-alist)
+    ;; Connect the major mode to the loaded library.
+    (add-to-list 'tree-sitter-major-mode-language-alist
+                 '(sdml-mode . sdml))))
+
+
+;; --------------------------------------------------------------------------
+;; Tree-Sitter  Additional Faces
 ;; --------------------------------------------------------------------------
 
 ;; The `tree-sitter-hl' package expects to map highlight scopes to faces named
@@ -167,17 +221,7 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Syntax
-;; --------------------------------------------------------------------------
-
-(defvar sdml-mode-syntax-table
-  (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?- ". 12b" table)
-    table))
-
-
-;; --------------------------------------------------------------------------
-;; Highlighting
+;; Tree-Sitter  Highlighting
 ;; --------------------------------------------------------------------------
 
 (defconst sdml-mode-tree-sitter-hl-patterns
@@ -202,6 +246,7 @@
     "enum"
     "event"
     "property"
+    "rdf"
     "structure"
     "union"
     "is"
@@ -240,7 +285,7 @@
    ;; -------------------------------------------------------------------
 
    (module name: (identifier) @type.scope)
-   (module "base" @keyword)
+   (module "version" @keyword)
 
    (import_statement [ "[" "]" ] @punctuation.bracket)
 
@@ -355,28 +400,31 @@
     source: (identifier_reference) @type)
 
    (structure_def name: (identifier) @type)
-   (member_group "group" @keyword)
 
    (union_def name: (identifier) @type)
+
+   ;; -------------------------------------------------------------------
+   ;; RDF Definitions
+   ;; -------------------------------------------------------------------
+
+   (rdf_def name: (identifier) @type)
 
    ;; -------------------------------------------------------------------
    ;; Type Classes
    ;; -------------------------------------------------------------------
 
    (type_class_def name: (identifier) @type)
-
-   (type_class_parameters [ "(" ")" ] @punctuation.bracket)
+   (type_class_def [ "(" ")" ] @punctuation.bracket)
 
    (type_variable name: (identifier) @type)
-
-   (type_variable_restriction "+" @operator)
+   (type_variable "+" @operator)
 
    (type_class_reference name: (identifier_reference) @type)
 
    (type_class_arguments [ "(" ")" ] @punctuation.bracket)
 
    (method_def "def" @keyword)
-   (method_def name: (identifier) @method)
+   (method_def name: (identifier) @method.definition)
 
    (wildcard) @type.builtin
 
@@ -465,7 +513,7 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Indentation
+;; Tree-Sitter  Indentation
 ;; --------------------------------------------------------------------------
 
 ;; The `tree-sitter-indent' package expects to find a function named
@@ -474,7 +522,6 @@
 (defconst tree-sitter-indent-sdml-scopes
   '(;; These nodes are always indented
     (indent-all . (member
-                   member_group
                    entity_identity
                    function_body
                    constant_def
@@ -496,7 +543,6 @@
                     type_class_body
                     function_body
                     entity_identity
-                    member_group
                     sequence_of_values
                     sequence_of_predicate_values
                     sequence_builder
@@ -527,7 +573,7 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Folding
+;; Tree-Sitter  Folding
 ;; --------------------------------------------------------------------------
 
 (when (featurep 'ts-fold)
@@ -541,6 +587,7 @@
       (structure_def . (ts-fold-range-seq 8 2))
       (type_class_def . (ts-fold-range-seq 4 2))
       (union_def . (ts-fold-range-seq 4 2))
+      (rdf_thing_def . (ts-fold-range-seq 2 2))
       ;; bodies
       (annotation_only_body . (ts-fold-range-seq 1 -2))
       (entity_body . (ts-fold-range-seq 1 -2))
@@ -549,8 +596,6 @@
       (structure_body . (ts-fold-range-seq 1 -2))
       (type_class_body . (ts-fold-range-seq 1 -2))
       (union_body . (ts-fold-range-seq 1 -2))
-      ;; groups
-      (member_group . (ts-fold-range-seq 4 -2))
       ;; Constraints
       (constraint . (ts-fold-range-seq 5 2))
       (sequence_builder . ts-fold-range-seq)
@@ -559,6 +604,111 @@
       (sequence_of_predicate_values . ts-fold-range-seq)
       ;; comments
       (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
+
+
+;; --------------------------------------------------------------------------
+;; Emacs  Syntax
+;; --------------------------------------------------------------------------
+
+(defvar sdml-mode-syntax-table
+  (let ((table (make-syntax-table)))
+    (modify-syntax-entry ?- ". 12b" table)
+    table))
+
+
+;; --------------------------------------------------------------------------
+;; Compile-like Actions
+;; --------------------------------------------------------------------------
+
+(defun sdml--cli-make-arg (plist-args key &optional arg-name ignore-me)
+  (when (not ignore-me)
+    (let ((value (plist-get plist-args key))
+          (arg-name (if (not (null arg-name))
+                        arg-name
+                      (substring (symbol-name key) 1))))
+      (if (null value) "" (format "--%s %s" arg-name value)))))
+
+(defun sdml--cli-make-command (command &rest plist-args)
+  "Make an sdml command-line COMMAND with additional PLIST-ARGS."
+  (interactive)
+  (when (eq major-mode 'sdml-mode)
+    (let* ((cli-name (or sdml-cli-name "sdml"))
+           (cmd-name (executable-find cli-name))
+           (file-name (buffer-file-name (current-buffer))))
+      (cond
+       ((null cmd-name)
+        (message "couldn't find the sdml cli: %s" cli-name))
+       ((null file-name)
+        (message "buffer doesn't have a file name"))
+       (t
+        (string-join
+         (list cmd-name
+               (sdml--cli-make-arg plist-args :log-filter)
+               command
+               (sdml--cli-make-arg plist-args :validation-level "level" (not (string= command "validate")))
+               (sdml--cli-make-arg plist-args :depth nil (not (string= command "deps")))
+               (sdml--cli-make-arg plist-args :output-format)
+               (sdml--cli-make-arg plist-args :output-file)
+               (or (sdml--cli-make-arg plist-args :input-file)
+                   (let ((arg-value (plist-get plist-args :input-module)))
+                     (if (null arg-value) "" arg-value))))
+         " "))))))
+
+(defconst sdml--validation-error-regexp
+  "^\\(?:\\(bug\\|error\\)\\|\\(warning\\)\\|\\(help\\|note\\)\\)\\[\\([BEIW][[:digit:]]\\{4\\}\\)]: .*
+\\(?:^  ┌─ \\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)\\)")
+
+(defun sdml--validation-setup ()
+  "Setup validation support for the `compile' command."
+  (setq ansi-color-for-compilation-mode t)
+  (add-hook 'compilation-filter-hook 'sdml--colorize-compilation-buffer)
+  (let ((new-alist-alist (assq-delete-all 'sdml compilation-error-regexp-alist-alist)))
+    (setq
+     compilation-error-regexp-alist-alist
+     (add-to-list
+      'new-alist-alist
+      `(sdml ,sdml--compile-error-regexp 5 6 7 (2 . 3))))
+    (setq
+     compilation-error-regexp-alist
+     (add-to-list
+      'compilation-error-regexp-alist
+      'sdml))))
+
+(defun sdml--run-command (command buffer-name &optional error-buffer-name)
+  "Run COMMAND with output to BUFFER-NAME and ERROR-BUFFER-NAME."
+  (let* ((current-load-path (or (getenv "SDML_PATH") "")))
+    (with-environment-variables (("SDML_PATH" (concat current-load-path
+                                                      (string-join sdml-load-path ":"))))
+      (with-output-to-temp-buffer buffer-name
+        (shell-command command
+                       buffer-name
+                       (or error-buffer-name "*sdml errors*"))
+        (pop-to-buffer buffer-name)
+        (ansi-color-apply-on-region (point-min) (point-max))
+        (special-mode)))))
+
+(defun sdml-current-buffer-dependencies ()
+  "Dependencies of the current buffer."
+  (interactive)
+  (when (eq major-mode 'sdml-mode)
+    (let ((cmd-line (sdml--cli-make-command
+                     "deps"
+                     :log-filter sdml-cli-log-filter
+                     :input-file (buffer-file-name (current-buffer)))))
+      (when (not (null cmd-line))
+        (sdml--run-command cmd-line "*sdml dependencies*")))))
+
+(defun sdml-validate-current-buffer ()
+  "Validate the current buffer using the `compile' command."
+  (interactive)
+  (when (eq major-mode 'sdml-mode)
+    (let ((cmd-line (sdml--cli-make-command
+                     "validate"
+                     :log-filter sdml-cli-log-filter
+                     :validation-level sdml-cli-validation-level
+                     :input-file (buffer-file-name (current-buffer)))))
+      (when (not (null cmd-line))
+        (compile cmd-line)))))
 
 
 ;; --------------------------------------------------------------------------
@@ -575,6 +725,8 @@
     (define-key map (kbd "C-c C-s C-+") 'ts-fold-open-all)
     (define-key map (kbd "C-c C-s /") 'ts-fold-open-recursively)
     (define-key map (kbd "C-c C-s .") 'ts-fold-toggle)
+    (define-key map (kbd "C-c C-s v") 'sdml-validate-current-buffer)
+    (define-key map (kbd "C-c C-s t") 'sdml-current-buffer-dependencies)
     map)
   "Keymap for SDML major mode.")
 
@@ -742,20 +894,32 @@
 ;; --------------------------------------------------------------------------
 
 (defun sdml-mode-setup (&optional dylib-file)
-  "Load and connect the parser dynamic library.
+  "Call internal setup functions for tree-sitter and validation.
 
-  Load the dynamic library, either with the explicit path
-  in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
-  The parser library will be named  `sdml' with a
-  platform-specific extension in `tree-sitter-load-suffixes'."
-  (unless (assoc 'sdml tree-sitter-languages)
-    ;; Load the dynamic library from the search path.
-    (tree-sitter-load 'sdml dylib-file))
+* Tree-sitter
 
-  (unless (assoc 'sdml-mode tree-sitter-major-mode-language-alist)
-    ;; Connect the major mode to the loaded library.
-    (add-to-list 'tree-sitter-major-mode-language-alist
-                 '(sdml-mode . sdml))))
+Load the dynamic library, either with the explicit path
+in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
+The parser library will be named  `sdml' with a
+platform-specific extension in `tree-sitter-load-suffixes'.
+
+* Validation (compile)
+
+Enable a validation command based on the builtin `compile'."
+  (sdml--tree-sitter-setup dylib-file)
+  (sdml--validation-setup))
+
+
+(defvar sdml-after-save-hook nil
+  "Hook for sdml-mode and called after saving files.
+
+This hook can be useful for running commands such as:
+
+1. `sdml-validate-current-buffer' to validate and show errors on every save.
+2. `sdml-current-buffer-dependencies' to keep a dependency tree up-to-date.")
+
+; (add-hook 'sdml-after-save-hook 'sdml-validate-current-buffer)
+; (add-hook 'sdml-after-save-hook 'sdml-current-buffer-dependencies)
 
 ;;;###autoload
 (define-derived-mode
@@ -772,6 +936,9 @@
   :syntax-table sdml-mode-syntax-table
 
   :abbrev-table sdml-mode-abbrev-table
+
+  ;; Setup hook
+  (add-hook 'after-save-hook (lambda () (run-hooks 'sdml-after-save-hook)))
 
   ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
@@ -808,7 +975,8 @@
     (ts-fold-line-comment-mode)
 
     (when (and window-system (featurep ts-fold-indicators))
-      (ts-fold-indicators-mode))))
+      (ts-fold-indicators-mode)))
+  (run-mode-hooks 'sdml-mode-hook))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-mode))
