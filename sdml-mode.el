@@ -116,6 +116,17 @@
 ;; `(setq ts-fold-indicators-priority 30)'
 ;;
 
+;; Interactive Commands
+;;
+;; `sdml-validate-current-buffer' to validate and show errors on every save. Adding
+;; this as a save-hook allows direct validation in real time.
+;;
+;; `(add-hook 'after-save-hook 'sdml-validate-current-buffer)'
+;;
+;; `sdml-current-buffer-dependencies' to keep a dependency tree up-to-date.
+;;
+
+
 ;;; Code:
 
 (eval-when-compile
@@ -909,18 +920,6 @@ Enable a validation command based on the builtin `compile'."
   (sdml--tree-sitter-setup dylib-file)
   (sdml--validation-setup))
 
-
-(defvar sdml-after-save-hook nil
-  "Hook for sdml-mode and called after saving files.
-
-This hook can be useful for running commands such as:
-
-1. `sdml-validate-current-buffer' to validate and show errors on every save.
-2. `sdml-current-buffer-dependencies' to keep a dependency tree up-to-date.")
-
-; (add-hook 'sdml-after-save-hook 'sdml-validate-current-buffer)
-; (add-hook 'sdml-after-save-hook 'sdml-current-buffer-dependencies)
-
 ;;;###autoload
 (define-derived-mode
   sdml-mode
@@ -936,9 +935,6 @@ This hook can be useful for running commands such as:
   :syntax-table sdml-mode-syntax-table
 
   :abbrev-table sdml-mode-abbrev-table
-
-  ;; Setup hook
-  (add-hook 'after-save-hook (lambda () (run-hooks 'sdml-after-save-hook)))
 
   ;; Only the basic font-lock, taken care of by tree-sitter-hl-mode
   (unless font-lock-defaults
