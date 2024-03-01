@@ -1,0 +1,20 @@
+; -*- mode: emacs-lisp; lexical-binding: t -*-
+
+(eldev-require-version "1.2")
+
+(eldev-use-package-archive 'melpa)
+
+(eldev-use-plugin 'autoloads)
+(eldev-use-plugin 'undercover)
+
+(eldev-add-extra-dependencies 'test 'paredit 's 'buttercup)
+
+(setf eldev-project-loading-mode 'byte-compiled)
+
+(setf eldev-standard-excludes `(:or ,eldev-standard-excludes
+                                    "sdml-model" "flycheck-sdml" "ob-sdml" "sdml-fold" "sdml-ispell"))
+
+(setf eldev-release-post-release-commit-message "Post-release version bump."
+      eldev-release-post-release-commit (lambda (version)
+                                          (let ((eldev-release-min-version-size 0))
+                                            (eldev-release-next-snapshot-version-unless-already-snapshot version))))

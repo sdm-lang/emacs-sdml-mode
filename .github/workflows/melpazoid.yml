@@ -1,10 +1,20 @@
-name: melpazoid
+name: Melpazoid
 
 on: [push, pull_request]
 
 jobs:
-  flycheck-sdml:
+  melpazoid:
+    strategy:
+      matrix:
+        package:
+          - flycheck-sdml
+          - ob-sdml
+          - sdml-fold
+          - sdml-ispell
+          - sdml-modesdml-model
+           
     runs-on: ubuntu-latest
+    
     steps:
     - name: Checkout
       uses: actions/checkout@v3
@@ -21,88 +31,12 @@ jobs:
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
         pip install ~/melpazoid
 
-    - name: Check Package flycheck-sdml
+    - Name: Check Package ${{matrix/package}}
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (flycheck-sdml :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("flycheck-sdml.el"))
+        RECIPE: (${{matrix/package}} :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("${{matrix/package}}/${{matrix/package}}.el"))
         # set this to false (or remove it) if the package isn't on MELPA:
         EXIST_OK: false
-      run: echo $GITHUB_REF && make -C ~/melpazoid
-
-  ob-sdml:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-        
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-      
-    - name: Install Melpazoid
       run: |
-        python -m pip install --upgrade pip
-        sudo apt-get install emacs && emacs --version
-        git clone https://github.com/riscy/melpazoid.git ~/melpazoid
-        pip install ~/melpazoid
-
-    - name: Check Package ob-sdml
-      env:
-        LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (ob-sdml :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("ob-sdml.el"))
-        # set this to false (or remove it) if the package isn't on MELPA:
-        EXIST_OK: false
-      run: echo $GITHUB_REF && make -C ~/melpazoid
-
-  sdml-ispell:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-        
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-      
-    - name: Install Melpazoid
-      run: |
-        python -m pip install --upgrade pip
-        sudo apt-get install emacs && emacs --version
-        git clone https://github.com/riscy/melpazoid.git ~/melpazoid
-        pip install ~/melpazoid
-
-    - name: Check Package sdml-ispell
-      env:
-        LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (sdml-ispell :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("sdml-ispell.el"))
-        # set this to false (or remove it) if the package isn't on MELPA:
-        EXIST_OK: false
-      run: echo $GITHUB_REF && make -C ~/melpazoid
-
-  sdml-mode:
-    runs-on: ubuntu-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v3
-      
-    - name: Set up Python 3.9
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.9'
-     
-    - name: Install Melpazoid
-      run: |
-        python -m pip install --upgrade pip
-        sudo apt-get install emacs && emacs --version
-        git clone https://github.com/riscy/melpazoid.git ~/melpazoid
-        pip install ~/melpazoid
-
-    - name: Check Package sdml-mode
-      env:
-        LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (sdml-mode :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("sdml-mode.el"))
-        # set this to false (or remove it) if the package isn't on MELPA:
-        EXIST_OK: false
-      run: echo $GITHUB_REF && make -C ~/melpazoid
+        echo $GITHUB_REF
+        make -C ~/melpazoid

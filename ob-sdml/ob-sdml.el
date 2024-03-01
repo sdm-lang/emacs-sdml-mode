@@ -1,36 +1,30 @@
 ;;; ob-sdml.el --- Org-Babel for SDML -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2023 Simon Johnston
+;; Copyright (c) 2023, 2024 Simon Johnston
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.3
-;; Package-Requires: ((emacs "28.2") (org "9.6.0"))
+;; Package-Requires: ((emacs "28.2") (org "9.5.5") (sdml-mode "0.1.6"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
 
 ;;; License:
 
-;; Permission is hereby granted, free of charge, to any person obtaining a copy
-;; of this software and associated documentation files (the "Software"), to deal
-;; in the Software without restriction, including without limitation the rights
-;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-;; copies of the Software, and to permit persons to whom the Software is
-;; furnished to do so, subject to the following conditions:
-
-;; The above copyright notice and this permission notice shall be included in all
-;; copies or substantial portions of the Software.
-
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-;; SOFTWARE.
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
 
 ;;; Commentary:
 
-;; Provides Babel integration for SDML source blocks. This relies on the
+;; Provides Babel integration for SDML source blocks.  This relies on the
 ;; command-line tool `sdml' (https://github.com/johnstonskj/rust-sdml) to
 ;; run checkers, diagram generators, and conversion tools.
 ;;
@@ -39,7 +33,7 @@
 ;;
 ;; The following header arguments are specifically used on source blocks:
 ;;
-;; `:cmd' -- optional, the name or path to the command-line tool. Default is "sdml".
+;; `:cmd' -- optional, the name or path to the command-line tool.  Default is "sdml".
 ;; `:cmdline' -- required, denotes the action to perform.
 ;; `:file' -- required, the file to output results to.
 ;;
@@ -55,7 +49,7 @@
 
 (require 'org)
 (require 'ob)
-
+(require 'sdml-mode)
 
 (defcustom ob-sdml-cmd "sdml"
   "Name of the command to use for processing SDML source.
@@ -63,7 +57,7 @@ May be either a command in the path, like sdml
 or an absolute path name, like /usr/local/bin/sdml
 parameters may be used, like sdml -v"
   :tag "Org Babel SDML Command"
-  :type 'string
+  :type 'file
   :group 'org-babel)
 
 
@@ -96,7 +90,7 @@ The code to process is in BODY, the block parameters are in PARAMS.
 This function is called by `org-babel-execute-src-block'."
   (let* ((out-file (cdr (or (assoc :file params)
 			                (error "You need to specify a :file parameter"))))
-         (cmd (or (cdr (assoc :cmd params)) ob-sdml-cmd))
+         (cmd (or (cdr (assoc :cmd params)) sdml-cli-name))
 	     (cmdline (cdr (assoc :cmdline params)))
          (output-format (if (and (string-prefix-p "draw" cmdline)
                                  (not (string-search "--output-format" cmdline)))
@@ -104,7 +98,7 @@ This function is called by `org-babel-execute-src-block'."
                           ""))
 	     (coding-system-for-read 'utf-8) ; use utf-8 with sub-processes
 	     (coding-system-for-write 'utf-8)
-	     (in-file (org-babel-temp-file (format "%s-" ob-sdml-cmd))))
+	     (in-file (org-babel-temp-file (format "%s-" sdml-cli-name))))
     (with-temp-file in-file
       (insert (ob-sdml-expand-body body params)))
     (message "%s" (concat cmd
@@ -126,17 +120,10 @@ This function is called by `org-babel-execute-src-block'."
   (error "SDML does not support sessions"))
 
 (defun ob-sdml-setup ()
-  "Set of mapping."
+  "Set up language mapping for Babel."
   (add-to-list 'org-babel-load-languages '(sdml . t))
   (org-babel-do-load-languages 'org-babel-load-languages
                                org-babel-load-languages))
-
-(defun ob-sdml-unload ()
-  "Remove all."
-  (dolist (sym '(ob-sdml-cmd))
-    (makunbound sym)
-    (unintern sym nil))
-  (unload-feature 'ob-sdml))
 
 (provide 'ob-sdml)
 

@@ -1,6 +1,6 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2023 Simon Johnston
+;; Copyright (c) 2023, 2024 Simon Johnston
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.6
@@ -10,23 +10,17 @@
 
 ;;; License:
 
-;; Permission is hereby granted, free of charge, to any person obtaining a copy
-;; of this software and associated documentation files (the "Software"), to deal
-;; in the Software without restriction, including without limitation the rights
-;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-;; copies of the Software, and to permit persons to whom the Software is
-;; furnished to do so, subject to the following conditions:
-
-;; The above copyright notice and this permission notice shall be included in all
-;; copies or substantial portions of the Software.
-
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-;; SOFTWARE.
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
 
 ;;; Commentary:
 
@@ -34,16 +28,16 @@
 ;; This package provides a tree-sitter based major mode for SDML.
 
 ;;
-;;         ___          _____          ___ 
-;;        /  /\        /  /::\        /__/\ 
-;;       /  /:/_      /  /:/\:\      |  |::\ 
-;;      /  /:/ /\    /  /:/  \:\     |  |:|:\    ___     ___ 
-;;     /  /:/ /::\  /__/:/ \__\:|  __|__|:|\:\  /__/\   /  /\ 
-;;    /__/:/ /:/\:\ \  \:\ /  /:/ /__/::::| \:\ \  \:\ /  /:/ 
-;;    \  \:\/:/~/:/  \  \:\  /:/  \  \:\~~\__\/  \  \:\  /:/ 
-;;     \  \::/ /:/    \  \:\/:/    \  \:\         \  \:\/:/ 
-;;      \__\/ /:/      \  \::/      \  \:\         \  \::/ 
-;;        /__/:/        \__\/        \  \:\         \__\/ 
+;;         ___          _____          ___
+;;        /  /\        /  /::\        /__/\
+;;       /  /:/_      /  /:/\:\      |  |::\
+;;      /  /:/ /\    /  /:/  \:\     |  |:|:\    ___     ___
+;;     /  /:/ /::\  /__/:/ \__\:|  __|__|:|\:\  /__/\   /  /\
+;;    /__/:/ /:/\:\ \  \:\ /  /:/ /__/::::| \:\ \  \:\ /  /:/
+;;    \  \:\/:/~/:/  \  \:\  /:/  \  \:\~~\__\/  \  \:\  /:/
+;;     \  \::/ /:/    \  \:\/:/    \  \:\         \  \:\/:/
+;;      \__\/ /:/      \  \::/      \  \:\         \  \::/
+;;        /__/:/        \__\/        \  \:\         \__\/
 ;;        \__\/          Domain       \__\/          Language
 ;;         Simple                      Modeling
 ;;
@@ -65,20 +59,6 @@
 ;;
 ;; `\\[tree-sitter-debug-mode]' -- open tree-sitter debug view
 ;; `\\[tree-sitter-query-builder]' -- open tree-sitter query builder
-
-;; Folding
-;;
-;; This uses a package `ts-fold' which is not provided by any repository and must
-;; therefore be installed and required PRIOR to this package if you want to enable
-;; folding.
-;;
-;; `\\[ts-fold-close]' -- fold item
-;; `\\[ts-fold-open]' -- unfold item
-;; `\\[ts-fold-close-all]' -- fold all items in buffer
-;; `\\[ts-fold-open-all]' -- unfold all items in buffer
-;; `\\[ts-fold-open-recursively]' -- unfold item and all children
-;; `\\[ts-fold-toggle]' -- toggle fold/unfold state
-;;
 
 ;; Abbreviations and Skeletons
 ;;
@@ -103,27 +83,25 @@
 ;;   `sd'=string, `du'=unsigned
 ;;
 
-;; Fold Indicators
-;;
-;; This is only enabled if folding is enabled (see above) and running in GUI mode.
-;;
-;; To switch to left/right fringe: (Default is left-fringe)
-;;
-;; `(setq ts-fold-indicators-fringe 'right-fringe)'
-;;
-;; To lower/higher the fringe overlay's priority: (Default is 30)
-;;
-;; `(setq ts-fold-indicators-priority 30)'
-;;
-
 ;; Interactive Commands
 ;;
-;; `sdml-validate-current-buffer' to validate and show errors on every save. Adding
-;; this as a save-hook allows direct validation in real time.
+;; `sdml-mode-validate-current-buffer' (\\[sdml-mode-validate-current-buffer]) to
+;; validate and show errors for the buffer's current module.
+;;
+;; Adding this as a save-hook allows  validation on every save of a buffer.
 ;;
 ;; `(add-hook 'after-save-hook 'sdml-validate-current-buffer)'
 ;;
-;; `sdml-current-buffer-dependencies' to keep a dependency tree up-to-date.
+;; `sdml-mode-current-buffer-dependencies' (\\[sdml-mode-current-buffer-dependencies])
+;; to display the dependencies of the curtent buffer's module.
+;;
+
+;; Extensions
+;;
+;; `flycheck-sdml' --
+;; `ob-sdml' --
+;; `sdml-fold' --
+;; `sdml-ispell' --
 ;;
 
 
@@ -136,8 +114,10 @@
 (require 'tree-sitter-hl) ;; included in above
 (require 'tree-sitter-indent)
 
-(require 'ansi-color)
-(require 'compile)
+(require 'ansi-color) ;; built-in
+(require 'compile) ;; built-in
+
+(require 'sdml-cli)
 
 ;; --------------------------------------------------------------------------
 ;; Customization
@@ -149,37 +129,20 @@
   :prefix "sdml-"
   :group 'languages)
 
-(defcustom sdml-indent-offset 2
+(defcustom sdml-mode-indent-offset 2
   "Number of spaces for each indentation step."
   :tag "Indentation number of spaces"
   :type 'natnum
   :group 'sdml)
 
-(defcustom sdml-prettify-symbols-alist
+(defcustom sdml-mode-prettify-symbols-alist
   '(("->" . ?→) ("<-" . ?←) ("forall" ?∀) ("exists" ?∃) ("in" ?∈) (":=" ?≔))
   "An alist of symbol prettifications used for `prettify-symbols-alist'."
   :tag "Symbol mapping for prettify"
   :type '(repeat (cons string character))
   :group 'sdml)
 
-(defcustom sdml-cli-name "sdml"
-  "The name of the command-line tool to use for SDML actions."
-  :tag "CLI tool name"
-  :type 'string
-  :group 'sdml)
-
-(defcustom sdml-cli-log-filter 'none
-  "The level of log information to emit from the command-line tool."
-  :tag "Logging filter level"
-  :type '(choice (const :tag "None" none)
-                 (const :tag "Errors" errors)
-                 (const :tag "Warnings" warnings)
-                 (const :tag "Information" information)
-                 (const :tag "Debugging" debugging)
-                 (const :tag "Tracing" tracing))
-  :group 'sdml)
-
-(defcustom sdml-cli-validation-level 'warnings
+(defcustom sdml-mode-validation-level 'warnings
   "The level of information to provide during validation."
   :tag "Validation level"
   :type '(choice (const :tag "None" none)
@@ -191,18 +154,11 @@
                  (const :tag "All" all))
   :group 'sdml)
 
-(defcustom sdml-load-path nil
-  "A list of directories to be used as the `SDML_PATH' variable value."
-  :tag "CLI load path"
-  :type '(repeat directory)
-  :group 'sdml)
-
-
 ;; --------------------------------------------------------------------------
 ;; Tree-Sitter  Library
 ;; --------------------------------------------------------------------------
 
-(defun sdml--tree-sitter-setup (&optional dylib-file)
+(defun sdml-mode--tree-sitter-setup (&optional dylib-file)
   "Load and connect the parser library in DYLIB-FILE."
   (unless (assoc 'sdml tree-sitter-languages)
     ;; Load the dynamic library from the search path.
@@ -584,40 +540,6 @@
 
 
 ;; --------------------------------------------------------------------------
-;; Tree-Sitter  Folding
-;; --------------------------------------------------------------------------
-
-(when (featurep 'ts-fold)
-  (defconst sdml-mode-folding-definitions
-    '(;; definitions
-      (data_type_def . (ts-fold-range-seq 7 2))
-      (entity_def . (ts-fold-range-seq 5 2))
-      (enum_def . (ts-fold-range-seq 3 2))
-      (event_def . (ts-fold-range-seq 4 2))
-      (property_def . (ts-fold-range-seq 7 2))
-      (structure_def . (ts-fold-range-seq 8 2))
-      (type_class_def . (ts-fold-range-seq 4 2))
-      (union_def . (ts-fold-range-seq 4 2))
-      (rdf_thing_def . (ts-fold-range-seq 2 2))
-      ;; bodies
-      (annotation_only_body . (ts-fold-range-seq 1 -2))
-      (entity_body . (ts-fold-range-seq 1 -2))
-      (enum_body . (ts-fold-range-seq 1 -2))
-      (property_body . (ts-fold-range-seq 1 -2))
-      (structure_body . (ts-fold-range-seq 1 -2))
-      (type_class_body . (ts-fold-range-seq 1 -2))
-      (union_body . (ts-fold-range-seq 1 -2))
-      ;; Constraints
-      (constraint . (ts-fold-range-seq 5 2))
-      (sequence_builder . ts-fold-range-seq)
-      ;; values
-      (sequence_of_values . ts-fold-range-seq)
-      (sequence_of_predicate_values . ts-fold-range-seq)
-      ;; comments
-      (line_comment . (lambda (node offset) (ts-fold-range-line-comment node offset ";;"))))))
-
-
-;; --------------------------------------------------------------------------
 ;; Emacs  Syntax
 ;; --------------------------------------------------------------------------
 
@@ -631,92 +553,29 @@
 ;; Compile-like Actions
 ;; --------------------------------------------------------------------------
 
-(defun sdml--cli-make-arg (plist-args key &optional arg-name ignore-me)
-  (when (not ignore-me)
-    (let ((value (plist-get plist-args key))
-          (arg-name (if (not (null arg-name))
-                        arg-name
-                      (substring (symbol-name key) 1))))
-      (if (null value) "" (format "--%s %s" arg-name value)))))
-
-(defun sdml--cli-make-command (command &rest plist-args)
-  "Make an sdml command-line COMMAND with additional PLIST-ARGS."
-  (interactive)
-  (when (eq major-mode 'sdml-mode)
-    (let* ((cli-name (or sdml-cli-name "sdml"))
-           (cmd-name (executable-find cli-name))
-           (file-name (buffer-file-name (current-buffer))))
-      (cond
-       ((null cmd-name)
-        (message "couldn't find the sdml cli: %s" cli-name))
-       ((null file-name)
-        (message "buffer doesn't have a file name"))
-       (t
-        (string-join
-         (list cmd-name
-               (sdml--cli-make-arg plist-args :log-filter)
-               command
-               (sdml--cli-make-arg plist-args :validation-level "level" (not (string= command "validate")))
-               (sdml--cli-make-arg plist-args :depth nil (not (string= command "deps")))
-               (sdml--cli-make-arg plist-args :output-format)
-               (sdml--cli-make-arg plist-args :output-file)
-               (or (sdml--cli-make-arg plist-args :input-file)
-                   (let ((arg-value (plist-get plist-args :input-module)))
-                     (if (null arg-value) "" arg-value))))
-         " "))))))
-
-(defconst sdml--validation-error-regexp
+(defconst sdml-mode-validation-error-regexp
   "^\\(?:\\(bug\\|error\\)\\|\\(warning\\)\\|\\(help\\|note\\)\\)\\[\\([BEIW][[:digit:]]\\{4\\}\\)]: .*
 \\(?:^  ┌─ \\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)\\)")
 
-(defun sdml--validation-setup ()
-  "Setup validation support for the `compile' command."
-  (setq ansi-color-for-compilation-mode t)
-  (add-hook 'compilation-filter-hook 'sdml--colorize-compilation-buffer)
-  (let ((new-alist-alist (assq-delete-all 'sdml compilation-error-regexp-alist-alist)))
-    (setq
-     compilation-error-regexp-alist-alist
-     (add-to-list
-      'new-alist-alist
-      `(sdml ,sdml--compile-error-regexp 5 6 7 (2 . 3))))
-    (setq
-     compilation-error-regexp-alist
-     (add-to-list
-      'compilation-error-regexp-alist
-      'sdml))))
-
-(defun sdml--run-command (command buffer-name &optional error-buffer-name)
-  "Run COMMAND with output to BUFFER-NAME and ERROR-BUFFER-NAME."
-  (let* ((current-load-path (or (getenv "SDML_PATH") "")))
-    (with-environment-variables (("SDML_PATH" (concat current-load-path
-                                                      (string-join sdml-load-path ":"))))
-      (with-output-to-temp-buffer buffer-name
-        (shell-command command
-                       buffer-name
-                       (or error-buffer-name "*sdml errors*"))
-        (pop-to-buffer buffer-name)
-        (ansi-color-apply-on-region (point-min) (point-max))
-        (special-mode)))))
-
-(defun sdml-current-buffer-dependencies ()
+(defun sdml-mode-current-buffer-dependencies ()
   "Dependencies of the current buffer."
   (interactive)
   (when (eq major-mode 'sdml-mode)
-    (let ((cmd-line (sdml--cli-make-command
+    (let ((cmd-line (sdml-cli-make-command
                      "deps"
                      :log-filter sdml-cli-log-filter
                      :input-file (buffer-file-name (current-buffer)))))
       (when (not (null cmd-line))
-        (sdml--run-command cmd-line "*sdml dependencies*")))))
+        (sdml-cli-run-command cmd-line "*SDML Dependencies*")))))
 
-(defun sdml-validate-current-buffer ()
+(defun sdml-mode-validate-current-buffer ()
   "Validate the current buffer using the `compile' command."
   (interactive)
   (when (eq major-mode 'sdml-mode)
-    (let ((cmd-line (sdml--cli-make-command
+    (let ((cmd-line (sdml-cli-make-command
                      "validate"
                      :log-filter sdml-cli-log-filter
-                     :validation-level sdml-cli-validation-level
+                     :validation-level sdml-mode-validation-level
                      :input-file (buffer-file-name (current-buffer)))))
       (when (not (null cmd-line))
         (compile cmd-line)))))
@@ -730,12 +589,6 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-s d") 'tree-sitter-debug-mode)
     (define-key map (kbd "C-c C-s q") 'tree-sitter-query-builder)
-    (define-key map (kbd "C-c C-s -") 'ts-fold-close)
-    (define-key map (kbd "C-c C-s +") 'ts-fold-open)
-    (define-key map (kbd "C-c C-s C--") 'ts-fold-close-all)
-    (define-key map (kbd "C-c C-s C-+") 'ts-fold-open-all)
-    (define-key map (kbd "C-c C-s /") 'ts-fold-open-recursively)
-    (define-key map (kbd "C-c C-s .") 'ts-fold-toggle)
     (define-key map (kbd "C-c C-s v") 'sdml-validate-current-buffer)
     (define-key map (kbd "C-c C-s t") 'sdml-current-buffer-dependencies)
     map)
@@ -912,13 +765,8 @@
 Load the dynamic library, either with the explicit path
 in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
 The parser library will be named  `sdml' with a
-platform-specific extension in `tree-sitter-load-suffixes'.
-
-* Validation (compile)
-
-Enable a validation command based on the builtin `compile'."
-  (sdml--tree-sitter-setup dylib-file)
-  (sdml--validation-setup))
+platform-specific extension in `tree-sitter-load-suffixes'."
+  (sdml-mode--tree-sitter-setup dylib-file))
 
 ;;;###autoload
 (define-derived-mode
@@ -946,7 +794,7 @@ Enable a validation command based on the builtin `compile'."
   (setq-local comment-multi-line t)
 
   ;; Prettify (prettify-symbols-mode)
-  (setq prettify-symbols-alist sdml-prettify-symbols-alist)
+  (setq prettify-symbols-alist sdml-mode-prettify-symbols-alist)
   (prettify-symbols-mode)
 
   (abbrev-mode)
@@ -959,20 +807,13 @@ Enable a validation command based on the builtin `compile'."
   ;; tree-sitter highlighting capabilities
   (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
   (tree-sitter-hl-mode)
-  (tree-sitter-indent-mode)
 
-  (when (featurep 'ts-fold)
-    ;; The package `ts-fold' must be installed and required PRIOR to this
-    ;; package if you want to enable folding.
-
-    (add-to-list 'ts-fold-range-alist
-                 `(sdml-mode . ,sdml-mode-folding-definitions))
-    (ts-fold-mode)
-    (ts-fold-line-comment-mode)
-
-    (when (and window-system (featurep ts-fold-indicators))
-      (ts-fold-indicators-mode)))
-  (run-mode-hooks 'sdml-mode-hook))
+  ;; enable the validation command based on the builtin `compile'.
+  (setq-local ansi-color-for-compilation-mode t)
+  (add-hook 'compilation-filter-hook 'sdml--colorize-compilation-buffer nil t)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               `(sdml ,sdml-mode-validation-error-regexp 5 6 7 (2 . 3)))
+  (add-to-list 'compilation-error-regexp-alist  'sdml))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-mode))
@@ -984,3 +825,4 @@ Enable a validation command based on the builtin `compile'."
 (provide 'sdml-mode)
 
 ;;; sdml-mode.el ends here
+
