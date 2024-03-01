@@ -2,7 +2,7 @@
 
 (eldev-require-version "1.2")
 
-(eldev-use-package-archive 'gnu)
+(eldev-use-package-archive 'gnu-elpa)
 (eldev-use-package-archive 'melpa)
 
 (eldev-use-plugin 'autoloads)
