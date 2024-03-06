@@ -18,6 +18,19 @@ Add `sdml' to `flycheck-checkers'." t nil)
 
 ;;;***
 
+;;;### (autoloads nil "flycheck_flycheck-sdml" "flycheck_flycheck-sdml.el"
+;;;;;;  (0 0 0 0))
+;;; Generated autoloads from flycheck_flycheck-sdml.el
+
+(autoload 'flycheck-sdml-setup "flycheck_flycheck-sdml" "\
+Setup SDML in Flycheck.
+
+Add `sdml' to `flycheck-checkers'." t nil)
+
+(register-definition-prefixes "flycheck_flycheck-sdml" '("flycheck-sdml-"))
+
+;;;***
+
 ;; Local Variables:
 ;; version-control: never
 ;; no-byte-compile: t

@@ -6,14 +6,6 @@
                          (or (file-name-directory #$) (car load-path))))
 
 
-;;;### (autoloads nil "flycheck_ob-sdml" "flycheck_ob-sdml.el" (0
-;;;;;;  0 0 0))
-;;; Generated autoloads from flycheck_ob-sdml.el
-
-(register-definition-prefixes "flycheck_ob-sdml" '("ob-sdml-" "org-babel-"))
-
-;;;***
-
 ;;;### (autoloads nil "ob-sdml" "ob-sdml.el" (0 0 0 0))
 ;;; Generated autoloads from ob-sdml.el
 
