@@ -13,9 +13,6 @@
 
 (setf eldev-project-loading-mode 'byte-compiled)
 
-(setf eldev-standard-excludes `(:or ,eldev-standard-excludes
-                                    "sdml-model" "flycheck-sdml" "ob-sdml" "sdml-fold" "sdml-ispell"))
-
 (setf eldev-release-post-release-commit-message "Post-release version bump."
       eldev-release-post-release-commit (lambda (version)
                                           (let ((eldev-release-min-version-size 0))

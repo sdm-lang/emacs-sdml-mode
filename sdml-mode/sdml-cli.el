@@ -1,10 +1,6 @@
 ;;; sdml-cli.el --- CLI integration -*- lexical-binding: t; -*-
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.0
-;; Package-Requires: ((emacs "28.2"))
-;; URL: https://github.com/johnstonskj/emacs-sdml-mode
-;; Keywords: languages tools
 
 ;;; License:
 
@@ -30,7 +26,7 @@
 
 ;;; Commentary:
 
-;; Complete description goes here.
+;; Internal module.
 
 ;;; Code:
 
