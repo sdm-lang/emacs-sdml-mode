@@ -113,6 +113,7 @@
   (defun sdml-fold-setup ()
     (message "Warning: sdml-fold-setup not enabled, no ts-fold")))
 
+(declare-function sdml-fold-setup "sdml-fold" ())
 (add-hook 'sdml-mode-hook #'sdml-fold-setup)
 
 (provide 'sdml-fold)
