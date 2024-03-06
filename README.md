@@ -65,12 +65,12 @@ The `sdml-mode` also adds to the `prettify-symbols-alist` list, the set of symbo
 Line indentation is provided by the `tree-sitter-indent-mode` minor mode based on the configuration in the constant
 `sdml-mode-folding-definitions`.
 
-Default indentation is two spaces, although this can be overridden by the custom variable `sdml-indent-offset`.
+Default indentation is two spaces, although this can be overridden by the custom variable `sdml-mode-indent-offset`.
 
 ### Code Folding
 
 Block Folding is provided by the `ts-fold-mode` minor mode based on the configuration in the constant
-`tree-sitter-indent-sdml-scopes`. Note that folding of groups of line comments is also supported.
+`sdml-mode-tree-sitter-indent-scopes`. Note that folding of groups of line comments is also supported.
 
 * `C-c C-s -` -- fold item
 * `C-c C-s +` -- unfold item
