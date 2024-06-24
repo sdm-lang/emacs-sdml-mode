@@ -46,8 +46,7 @@
 ;; Installing
 ;;
 ;; `(use-package sdml-mode
-;;    :ensure t
-;;    :config (sdml-mode-setup))'
+;;    :ensure t)'
 
 ;;
 ;; Usage

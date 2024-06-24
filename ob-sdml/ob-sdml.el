@@ -55,9 +55,27 @@
   "Name of the command to use for processing SDML source.
 May be either a command in the path, like sdml
 or an absolute path name, like /usr/local/bin/sdml
-parameters may be used, like sdml -v"
-  :tag "Org Babel SDML Command"
+parameters may be used, like sdml -v."
+  :tag "Org Babel SDML command"
   :type 'file
+  :group 'org-babel)
+
+(defcustom ob-sdml-log-filter 'errors
+  "The level of logging the `ob-sdml-cmd' command-line tool should emit."
+  :tag "Org Babel SDML log filter"
+  :type '(choice (const :tag "No Logging" none)
+                 (const :tag "Errors" errors)
+                 (const :tag "Warnings" warnings)
+                 (const :tag "Informational" information)
+                 (const :tag "Debugging" debugging)
+                 (const :tag "Tracing" tracing))
+  :group 'org-babel)
+
+(defcustom ob-sdml-no-color nil
+  "Disable color output from the `ob-sdml-cmd' command."
+  :tag "Org Babel SDML color switch"
+  :type `(choice (const :tag "Default" ,nil)
+                 (const :tag "No Color" t))
   :group 'org-babel)
 
 
@@ -99,19 +117,17 @@ This function is called by `org-babel-execute-src-block'."
 	     (coding-system-for-read 'utf-8) ; use utf-8 with sub-processes
 	     (coding-system-for-write 'utf-8)
 	     (in-file (org-babel-temp-file (format "%s-" sdml-cli-name))))
-    (with-temp-file in-file
-      (insert (ob-sdml-expand-body body params)))
-    (message "%s" (concat cmd
-         	 " " cmdline
-             output-format
-	         " --output-file " (org-babel-process-file-name out-file)
-             " --input-file " (org-babel-process-file-name in-file)))
-    (org-babel-eval
-     (concat cmd
-         	 " " cmdline
-             output-format
-	         " --output-file " (org-babel-process-file-name out-file)
-             " --input-file " (org-babel-process-file-name in-file)) "")
+    (let ((expanded-source (ob-sdml-expand-body body params)))
+      (message expanded-source)
+      (with-temp-file in-file
+        (insert expanded-source)))
+    (let ((full-cmd-string (concat cmd
+         	                       " " cmdline
+                                   output-format
+	                               " --output " (org-babel-process-file-name out-file)
+                                   " --input " (org-babel-process-file-name in-file))))
+      (message full-cmd-string)
+      (org-babel-eval full-cmd-string ""))
     ;; signal that output has already been written to file
     nil))
 
