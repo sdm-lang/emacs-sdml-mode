@@ -4,7 +4,7 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.8snapshot
-;; Package-Requires: ((emacs "28.2") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
+;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
 
@@ -113,8 +113,8 @@
 (require 'ansi-color) ;; built-in
 (require 'compile) ;; built-in
 
-(require 'sdml-cli)
 (require 'sdml-mode-abbrev)
+(require 'sdml-mode-cli)
 (require 'sdml-mode-hl)
 (require 'sdml-mode-indent)
 
