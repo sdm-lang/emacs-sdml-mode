@@ -37,7 +37,7 @@
 ;; --------------------------------------------------------------------------
 
 (defcustom sdml-cli-name "sdml"
-  "The name of the command-line tool to use for SDML actions."
+  "The name of the command line tool to use for SDML actions."
   :tag "CLI tool name"
   :type 'file
   :group 'sdml)

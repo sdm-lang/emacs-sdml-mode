@@ -30,7 +30,7 @@ jobs:
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
         pip install ~/melpazoid
 
-    - Name: Check Package ${{matrix/package}}
+    - name: Check Package ${{matrix/package}}
       env:
         LOCAL_REPO: ${{ github.workspace }}
         RECIPE: (sdml-mode :fetcher github :repo "sdm-lang/emacs-sdml-mode" :files ("sdml-mode.el"))
