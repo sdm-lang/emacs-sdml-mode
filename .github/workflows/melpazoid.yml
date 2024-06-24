@@ -4,21 +4,21 @@ on: [push, pull_request]
 
 jobs:
   melpazoid:
+    runs-on: ubuntu-latest
+        
     strategy:
       matrix:
-        package:
-          - flycheck-sdml
-          - ob-sdml
-          - sdml-fold
-          - sdml-ispell
-          - sdml-modesdml-model
-           
-    runs-on: ubuntu-latest
-    
+        emacs_version: ['28.1', '28.2', '29.1']
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-        
+
+    - name: Set up Emacs
+      uses: jcs090218/setup-emacs@master
+      with:
+        version: ${{matrix.emacs_version}}
+
     - name: Set up Python 3.9
       uses: actions/setup-python@v4
       with:
@@ -27,14 +27,13 @@ jobs:
     - name: Install Melpazoid
       run: |
         python -m pip install --upgrade pip
-        sudo apt-get install emacs && emacs --version
         git clone https://github.com/riscy/melpazoid.git ~/melpazoid
         pip install ~/melpazoid
 
     - Name: Check Package ${{matrix/package}}
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (${{matrix/package}} :fetcher github :repo "johnstonskj/emacs-sdml-mode" :files ("${{matrix/package}}/${{matrix/package}}.el"))
+        RECIPE: (sdml-mode :fetcher github :repo "sdm-lang/emacs-sdml-mode" :files ("sdml-mode.el"))
         # set this to false (or remove it) if the package isn't on MELPA:
         EXIST_OK: false
       run: |
