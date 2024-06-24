@@ -45,7 +45,7 @@ jobs:
 
     - name: Test the project
       run: |
-        eldev $ELDEV_ARGS test -p --expect 10
+        eldev $ELDEV_ARGS test --expect 10
         eldev $ELDEV_ARGS compile --warnings-as-errors
 
     - name: Ensure that copyright notices are up-to-date

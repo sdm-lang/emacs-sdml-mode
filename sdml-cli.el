@@ -43,7 +43,7 @@
   :group 'sdml)
 
 (defcustom sdml-cli-log-filter 'none
-  "The level of log information to emit from the command-line tool."
+  "The level of log information to emit from the command line tool."
   :tag "Logging filter level"
   :type '(choice (const :tag "None" none)
                  (const :tag "Errors" errors)
