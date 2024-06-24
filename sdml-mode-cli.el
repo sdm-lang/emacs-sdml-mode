@@ -1,4 +1,4 @@
-;;; sdml-cli.el --- CLI integration -*- lexical-binding: t; -*-
+;;; sdml-mode-cli.el --- CLI integration -*- lexical-binding: t; -*-
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 
@@ -124,6 +124,6 @@ to `sdml-cli-default-error-buffer-name'."
         (special-mode)))))
 
 
-(provide 'sdml-cli)
+(provide 'sdml-mode-cli)
 
-;;; sdml-cli.el ends here
+;;; sdml-mode-cli.el ends here
