@@ -77,7 +77,7 @@
       (if (null value) "" (format "--%s %s" arg-name value)))))
 
 (defun sdml-cli-make-command (command &rest plist-args)
-  "Make an sdml command-line COMMAND with additional PLIST-ARGS."
+  "Make an sdml COMMAND with additional PLIST-ARGS."
   (interactive)
   (when (eq major-mode 'sdml-mode)
     (let* ((cli-name (or sdml-cli-name "sdml"))

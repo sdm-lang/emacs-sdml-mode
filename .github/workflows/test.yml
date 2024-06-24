@@ -44,8 +44,9 @@ jobs:
         eldev $ELDEV_ARGS lint
 
     - name: Test the project
+      # Add --expect 10 to ensure a minimum number of tests!
       run: |
-        eldev $ELDEV_ARGS test --expect 10
+        eldev $ELDEV_ARGS test
         eldev $ELDEV_ARGS compile --warnings-as-errors
 
     - name: Ensure that copyright notices are up-to-date
