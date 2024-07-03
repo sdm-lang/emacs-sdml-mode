@@ -1,3 +1,1 @@
-(sdml-mode :fetcher github
-           :repo "sdm-lang/emacs-sdml-mode"
-           :files ("sdml-mode.el"))
+(sdml-mode :repo "sdm-lang/emacs-sdml-mode" :fetcher github)
