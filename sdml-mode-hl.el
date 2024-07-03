@@ -4,25 +4,19 @@
 
 ;;; License:
 
-;; Copyright (c) 2024 Simon Johnston
-
-;; Permission is hereby granted, free of charge, to any person obtaining a copy
-;; of this software and associated documentation files (the "Software"), to deal
-;; in the Software without restriction, including without limitation the rights
-;; to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-;; copies of the Software, and to permit persons to whom the Software is
-;; furnished to do so, subject to the following conditions:
-
-;; The above copyright notice and this permission notice shall be included in all
-;; copies or substantial portions of the Software.
-
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-;; IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-;; FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-;; AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-;; LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-;; OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-;; SOFTWARE.
+;; Copyright (c) 2023, 2024 Simon Johnston
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
 
 ;;; Commentary:
 
@@ -212,7 +206,9 @@
     name: (identifier) @type.definition
     source: (identifier_reference) @type)
 
-   (property_def name: (identifier) @variable.field)
+   (property_def
+    member: (member_def
+             name: (identifier) @type.definition))
 
    (structure_def name: (identifier) @type.definition)
 
@@ -223,6 +219,8 @@
    ;; -------------------------------------------------------------------
 
    (rdf_def name: (identifier) @type.definition)
+   (rdf_types "type" @keyword type: (identifier_reference) @type)
+   (rdf_types [ "[" "]" ] @punctuation.bracket)
 
    ;; -------------------------------------------------------------------
    ;; Type Classes
@@ -248,24 +246,13 @@
    ;; -------------------------------------------------------------------
 
    (entity_identity "identity" @keyword)
-   (entity_identity name: (identifier) @variable.field)
-   (entity_identity property: (identifier_reference) @variable.field)
-   (entity_identity target: (type_reference) @type)
-   (entity_identity "in" @keyword)
 
-   (member name: (identifier) @variable.field)
-   (member property: (identifier_reference) @variable.field)
-   (member target: (type_reference) @type)
-   (member
-    feature: (feature_reference
-              "features" @keyword
-              target: (identifier_reference) @type))
-   (member "in" @keyword)
+   (member_def name: (identifier) @variable.field)
+   (member_def target: (type_reference) @type)
 
-   (member_inverse_name
-    "(" @punctuation.bracket
-    (identifier) @variable.field
-    ")" @punctuation.bracket)
+   (property_ref
+    "ref" @keyword
+    property: (identifier_reference) @variable.field)
 
    (value_variant name: (identifier) @constant)
 
@@ -273,18 +260,8 @@
    (type_variant rename: (identifier) @type)
    (type_variant "as" @keyword)
 
-   (identity_role "identity" @keyword)
-   (identity_role
-    name: (identifier) @variable.field
-    target: (type_reference) @type)
-
-   (member_role
-    name: (identifier) @variable.field
-    target: (type_reference) @type)
-   (member_role feature: (feature_reference) @keyword)
-
-   (cardinality_expression (sequence_ordering) @keyword)
-   (cardinality_expression (sequence_uniqueness) @keyword)
+   (cardinality_expression ordering: (sequence_ordering) @keyword)
+   (cardinality_expression uniqueness: (sequence_uniqueness) @keyword)
    (cardinality_expression [ "{" "}" ] @punctuation.bracket)
 
    ;; -------------------------------------------------------------------
@@ -345,21 +322,28 @@
   :group 'tree-sitter-hl-faces)
 
 (defun sdml-mode-hl-face-mapping-funtion (capture-name)
-  "Add to the core mapping, if CAPTURE-NAME is 'module[.*]'."
-  (cond
+  "Add to the core mapping, if CAPTURE-NAME is \='module[.*]\='."
+    (cond
    ((string= capture-name "module") 'sdml-mode-hl-face-module)
    ((string= capture-name "module.definition") 'sdml-mode-hl-face-module-definition)
    ((string= capture-name "type.definition") 'sdml-mode-hl-face-type-definition)
    (t nil)))
 
-
 ;; --------------------------------------------------------------------------
-;; Highlighting  Setup Function
+;; Highlighting Minor Mode
 ;; --------------------------------------------------------------------------
 
-(defun sdml-mode-hl-setup ()
-  "Setup tree-sitter-hl with custom face mapping function."
-  ;; Doc: This should be set by major modes ...
+;;;###autoload
+(define-minor-mode
+  sdml-mode-hl-mode
+  "Minor mode to provide highlighting of SDML source."
+
+  :group 'sdml
+
+  :tag "Enable SDML highlighting minor mode"
+
+  :lighter nil
+
   (setq-local tree-sitter-hl-default-patterns sdml-mode-tree-sitter-hl-patterns)
   (add-function :before-until
                 tree-sitter-hl-face-mapping-function

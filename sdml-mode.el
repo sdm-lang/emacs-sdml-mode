@@ -1,7 +1,5 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
-;; Copyright (c) 2023, 2024 Simon Johnston
-
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.8snapshot
 ;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
@@ -10,6 +8,8 @@
 
 ;;; License:
 
+;; Copyright (c) 2023, 2024 Simon Johnston
+;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
 ;; You may obtain a copy of the License at
@@ -84,6 +84,7 @@
 
 ;; Interactive Commands
 ;;
+
 ;; `sdml-mode-validate-current-buffer' (\\[sdml-mode-validate-current-buffer]) to
 ;; validate and show errors for the buffer's current module.
 ;;
@@ -182,9 +183,9 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   "Validate the current buffer using the `compile' command."
   (interactive)
   (when (eq major-mode 'sdml-mode)
-    (let ((cmd-line (sdml-cli-make-command
+    (let ((cmd-line (sdml-mode-cli-make-command
                      "validate"
-                     :log-filter sdml-cli-log-filter
+                     :log-filter sdml-mode-cli-log-filter
                      :validation-level sdml-mode-validation-level
                      :input-file (buffer-file-name (current-buffer)))))
       (when (not (null cmd-line))
@@ -199,12 +200,12 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   "Dependencies of the current buffer."
   (interactive)
   (when (eq major-mode 'sdml-mode)
-    (let ((cmd-line (sdml-cli-make-command
+    (let ((cmd-line (sdml-mode-cli-make-command
                      "deps"
-                     :log-filter sdml-cli-log-filter
+                     :log-filter sdml-mode-cli-log-filter
                      :input-file (buffer-file-name (current-buffer)))))
       (when (not (null cmd-line))
-        (sdml-cli-run-command cmd-line "*SDML Dependencies*")))))
+        (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*")))))
 
 (defun sdml-mode-buffer-commands-setup ()
   "Setup buffer commands."
@@ -269,9 +270,9 @@ platform-specific extension in `tree-sitter-load-suffixes'."
 
   ;; Prettify (prettify-symbols-mode)
   (setq prettify-symbols-alist sdml-mode-prettify-symbols-alist)
-  (prettify-symbols-mode)
+  (prettify-symbols-mode 1)
 
-  (abbrev-mode)
+  (abbrev-mode 1)
 
   ;; connect the parser library
   (sdml-mode--tree-sitter-setup)
@@ -279,13 +280,13 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   ;; tree-sitter debug and query
   (setq-local tree-sitter-debug-jump-buttons t)
   (setq-local tree-sitter-debug-highlight-jump-region t)
-  (tree-sitter-mode)
+  (tree-sitter-mode 1)
 
   ;; tree-sitter highlighting support
-  (sdml-mode-hl-setup)
+  (sdml-mode-hl-mode 1)
 
   ;; tree-sitter indentation support
-  (sdml-mode-indent-setup)
+  (sdml-mode-indent-mode 1)
 
   ;; enable the validation command based on the builtin `compile'.
   (sdml-mode-buffer-commands-setup))
