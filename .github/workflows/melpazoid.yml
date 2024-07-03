@@ -33,7 +33,7 @@ jobs:
     - name: Check Package
       env:
         LOCAL_REPO: ${{ github.workspace }}
-        RECIPE: (sdml-mode :fetcher github :repo "sdm-lang/emacs-sdml-mode" :files ("sdml-mode-cli.el" "sdml-mode-abbrev.el" "sdml-mode-hl.el" "sdml-mode-indent.el" "sdml-mode.el"))
+        RECIPE: (sdml-mode :repo "sdm-lang/emacs-sdml-mode" :fetcher github)
         # set this to false (or remove it) if the package isn't on MELPA:
         EXIST_OK: false
       run: |
