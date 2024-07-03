@@ -104,13 +104,13 @@ will add the value of the Emacs variable `locale-language` as the language tag.
 
 ## Add-Ons
 
-- [emacs-sdml-fold](https://github.com/sdm-lang/emacs-sdml-fold) provides code-folding support to collapse and expand
+* [emacs-sdml-fold](https://github.com/sdm-lang/emacs-sdml-fold) provides code-folding support to collapse and expand
   definitions.
-- [emacs-sdml-ispell](https://github.com/sdm-lang/emacs-sdml-ispell) provides *selective* spell checking by only checking selected
+* [emacs-sdml-ispell](https://github.com/sdm-lang/emacs-sdml-ispell) provides *selective* spell checking by only checking selected
   nodes in the tree.
-- [emacs-flycheck-sdml](https://github.com/sdm-lang/emacs-flycheck-sdml) provides on-the-fly linting for SDML buffers.
-- [emacs-ob-sdml](https://github.com/sdm-lang/emacs-ob-sdml) provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
-produce diagrams and more.
+* [emacs-flycheck-sdml](https://github.com/sdm-lang/emacs-flycheck-sdml) provides on-the-fly linting for SDML buffers.
+* [emacs-ob-sdml](https://github.com/sdm-lang/emacs-ob-sdml) provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
+  produce diagrams and more.
 
 ## Contributing
 
@@ -120,17 +120,6 @@ including:
 * `byte-compile-file`
 * `package-lint`
 * `checkdoc`
-
-The following known *errors* are reported by package-lint due to the naming
-convention imposed by dependencies.
-
-``` text
-sdml-mode.el with byte-compile using Emacs 28.1:
-__:0: error: "tree-sitter-hl-face:type.scope" doesn't start with package's prefix "sdml".
-__:0: error: `tree-sitter-hl-face:type.scope' contains a non-standard separator `:', use hyphens instead (see Elisp Coding Conventions).
-__:0: error: "tree-sitter-indent-sdml-scopes" doesn't start with package's prefix "sdml".
-
-```
 
 ## License
 

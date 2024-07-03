@@ -1,7 +1,7 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.8snapshot
+;; Version: 0.1.8
 ;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools

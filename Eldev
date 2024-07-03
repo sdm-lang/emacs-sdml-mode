@@ -13,7 +13,10 @@
 
 (setf eldev-project-loading-mode 'byte-compiled)
 
-(setf eldev-release-post-release-commit-message "Post-release version bump."
-      eldev-release-post-release-commit (lambda (version)
-                                          (let ((eldev-release-min-version-size 0))
-                                            (eldev-release-next-snapshot-version-unless-already-snapshot version))))
+(setf eldev-release-allowed-branch "main"
+      ;; default for `eldev-release-commit-message' is good.
+      eldev-release-post-release-commit-message "Post-release version bump."
+      eldev-release-post-release-commit
+      (lambda (version)
+        (let ((eldev-release-min-version-size 0))
+          (eldev-release-next-snapshot-version-unless-already-snapshot version))))
