@@ -8,15 +8,15 @@ on:
 
 jobs:
   test:
-    runs-on: ${{matrix.os}}
-    continue-on-error: ${{matrix.emacs_version == 'snapshot'}}
-    env:
-      ELDEV_ARGS: -dtTQC
-
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
         emacs_version: ['28.1', '28.2', '29.1', 'snapshot']
+
+    runs-on: ${{matrix.os}}
+    continue-on-error: ${{matrix.emacs_version == 'snapshot'}}
+    env:
+      ELDEV_ARGS: -dtTQC
 
     steps:
     - name: Set up Emacs
