@@ -322,7 +322,7 @@
   :group 'tree-sitter-hl-faces)
 
 (defun sdml-mode-hl-face-mapping-funtion (capture-name)
-  "Add to the core mapping, if CAPTURE-NAME is \='module[.*]\='."
+  "Add to the core mapping, if CAPTURE-NAME is \\='module[.*]\\='."
     (cond
    ((string= capture-name "module") 'sdml-mode-hl-face-module)
    ((string= capture-name "module.definition") 'sdml-mode-hl-face-module-definition)
