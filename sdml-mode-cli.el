@@ -73,7 +73,7 @@
 (defun sdml-mode-cli-make-command (command &rest plist-args)
   "Make an sdml COMMAND with additional PLIST-ARGS."
   (interactive)
-  (when (eq major-mode 'sdml-mode)
+  (when (derived-mode-p 'sdml-mode)
     (let* ((cli-name (or sdml-mode-cli-name "sdml"))
            (cmd-name (executable-find cli-name))
            (file-name (buffer-file-name (current-buffer))))

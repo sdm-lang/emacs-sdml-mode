@@ -182,7 +182,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
 (defun sdml-mode-validate-current-buffer ()
   "Validate the current buffer using the `compile' command."
   (interactive)
-  (when (eq major-mode 'sdml-mode)
+  (when (derived-mode-p 'sdml-mode)
     (let ((cmd-line (sdml-mode-cli-make-command
                      "validate"
                      :log-filter sdml-mode-cli-log-filter
@@ -199,7 +199,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
 (defun sdml-mode-current-buffer-dependencies ()
   "Dependencies of the current buffer."
   (interactive)
-  (when (eq major-mode 'sdml-mode)
+  (when (derived-mode-p 'sdml-mode)
     (let ((cmd-line (sdml-mode-cli-make-command
                      "deps"
                      :log-filter sdml-mode-cli-log-filter
