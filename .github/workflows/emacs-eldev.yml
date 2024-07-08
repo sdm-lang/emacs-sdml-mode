@@ -1,4 +1,4 @@
-name: Emacs CI Testing
+name: Emacs Package CI (Eldev)
 
 on:
   push:
