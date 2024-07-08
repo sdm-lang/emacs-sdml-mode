@@ -188,7 +188,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
                      :log-filter sdml-mode-cli-log-filter
                      :validation-level sdml-mode-validation-level
                      :input-file (buffer-file-name (current-buffer)))))
-      (when (not (null cmd-line))
+      (when cmd-line
         (compile cmd-line)))))
 
 
@@ -204,7 +204,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
                      "deps"
                      :log-filter sdml-mode-cli-log-filter
                      :input-file (buffer-file-name (current-buffer)))))
-      (when (not (null cmd-line))
+      (when cmd-line
         (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*")))))
 
 (defun sdml-mode-buffer-commands-setup ()

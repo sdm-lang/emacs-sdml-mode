@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{matrix.os}}
     continue-on-error: ${{matrix.emacs_version == 'snapshot' || (matrix.emacs_version == '29.4' && matrix.os == 'windows-latest')}}
     env:
-      ELDEV_ARGS: -dtTQC
+      ELDEV_ARGS: --debug --trace --time --backtrace-on-abort --color
 
     steps:
     - name: Set up Emacs
@@ -31,7 +31,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Ensure that copyright notices are up-to-date
-      run: eldev $ELDEV_ARGS -p doctor up-to-date-copyright --all-tests
+      run: eldev $ELDEV_ARGS doctor up-to-date-copyright --all-tests
 
     - name: Lint the project
       run: eldev $ELDEV_ARGS lint

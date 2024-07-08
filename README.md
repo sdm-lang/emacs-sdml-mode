@@ -24,7 +24,7 @@ Or, interactively.
 First clone the Git repository to a local path.
 
 ```bash
-git clone https://github.com/johnstonskj/emacs-sdml-mode.git
+git clone https://github.com/sdm-lang/emacs-sdml-mode.git
 ```
 
 The following uses `use-package` but any equivalent package manager should work.
@@ -33,8 +33,7 @@ the core `tree-sitter` package.
 
 ```elisp
 (use-package sdml-mode
-  :load-path "/path/to/repo"
-  :config (sdml-mode-setup))
+  :load-path "/path/to/repo")
 ```
 
 ### Tree-Sitter Parser

@@ -65,7 +65,7 @@
   "Make a CLI argument with KEY from PLIST-ARGS."
   (when (not ignore-me)
     (let ((value (plist-get plist-args key))
-          (arg-name (if (not (null arg-name))
+          (arg-name (if arg-name
                         arg-name
                       (substring (symbol-name key) 1))))
       (if (null value) "" (format "--%s %s" arg-name value)))))
