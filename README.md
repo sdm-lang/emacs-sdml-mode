@@ -138,4 +138,13 @@ file in the repository for details.
 
 ## Changes
 
-The `0.1.x` series are all pre-release and do not appear in ELPA/MELPA.
+### Version 0.1.8
+
+* Feature: update to latest tree-sitter grammar (0.3.2).
+* Feature: no setup functions required, just `use-package` or `require`.
+* Feature: highlighting and indentation implemented as minor modes.
+* Feature: now available on melpa.
+
+### Versions 0.1.0 - 0.1.7
+
+These versions are all pre-release and do not appear in ELPA/MELPA.
