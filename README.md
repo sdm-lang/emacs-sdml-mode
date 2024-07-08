@@ -3,7 +3,7 @@
 ![SDML Logo Text](https://raw.githubusercontent.com/sdm-lang/.github/main/profile/horizontal-text.svg)
 
 This package provides an Emacs tree-sitter based major mode for SDML - the
-[Simple Domain Modeling Language](https://github.com/johnstonskj/tree-sitter-sdml).
+[Simple Domain Modeling Language](https://github.com/sdm-lang/tree-sitter-sdml).
 
 [![MELPA](https://melpa.org/packages/sdml-mode-badge.svg)](https://melpa.org/#/sdml-mode)
 
@@ -42,7 +42,7 @@ Additionally you will need to manually install the parser at this time. Start by
 cloning the repository.
 
 ```bash
-git clone https://github.com/johnstonskj/tree-sitter-sdml.git
+git clone https://github.com/sdm-lang/tree-sitter-sdml.git
 ```
 
 Build just the parser dynamic library, but importantly you need to select a
@@ -119,7 +119,7 @@ will add the value of the Emacs variable `locale-language` as the language tag.
 * [emacs-sdml-ispell](https://github.com/sdm-lang/emacs-sdml-ispell) provides *selective* spell checking by only checking selected
   nodes in the tree.
 * [emacs-flycheck-sdml](https://github.com/sdm-lang/emacs-flycheck-sdml) provides on-the-fly linting for SDML buffers.
-* [emacs-ob-sdml](https://github.com/sdm-lang/emacs-ob-sdml) provides the ability to call the SDML [command-line tool](https://github.com/johnstonskj/rust-sdml) to
+* [emacs-ob-sdml](https://github.com/sdm-lang/emacs-ob-sdml) provides the ability to call the SDML [command-line tool](https://github.com/sdm-lang/rust-sdml) to
   produce diagrams and more.
 
 ## Contributing
