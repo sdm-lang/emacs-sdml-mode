@@ -2,9 +2,9 @@ name: Emacs Package CI (Eldev)
 
 on:
   push:
-    paths-ignore: ['**.md', '**.adoc']
+    paths-ignore: ['**.md', '**.org']
   pull_request:
-    paths-ignore: ['**.md', '**.adoc']
+    paths-ignore: ['**.md', '**.org']
 
 jobs:
   test:
