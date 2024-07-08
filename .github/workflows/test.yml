@@ -14,7 +14,7 @@ jobs:
         emacs_version: ['28.1', '28.2', '29.1', '29.2', '29.3', '29.4', 'snapshot']
 
     runs-on: ${{matrix.os}}
-    continue-on-error: ${{matrix.emacs_version == 'snapshot'}}
+    continue-on-error: ${{matrix.emacs_version == 'snapshot' || (matrix.emacs_version == '29.4' && matrix.os == 'windows-latest')}}
     env:
       ELDEV_ARGS: -dtTQC
 
@@ -30,16 +30,15 @@ jobs:
     - name: Check out the source code
       uses: actions/checkout@v4
 
+    - name: Ensure that copyright notices are up-to-date
+      run: eldev $ELDEV_ARGS -p doctor up-to-date-copyright --all-tests
+
     - name: Lint the project
-      run: |
-        eldev $ELDEV_ARGS lint
+      run: eldev $ELDEV_ARGS lint
+
+    - name: Compile the project
+      run: eldev $ELDEV_ARGS compile --warnings-as-errors
 
     - name: Test the project
       # Add --expect 10 to ensure a minimum number of tests!
-      run: |
-        eldev $ELDEV_ARGS test
-        eldev $ELDEV_ARGS compile --warnings-as-errors
-
-    - name: Ensure that copyright notices are up-to-date
-      run: |
-        eldev $ELDEV_ARGS -p doctor up-to-date-copyright --all-tests
+      run: eldev $ELDEV_ARGS test

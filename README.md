@@ -5,17 +5,26 @@
 This package provides an Emacs tree-sitter based major mode for SDML - the
 [Simple Domain Modeling Language](https://github.com/johnstonskj/tree-sitter-sdml).
 
+[![MELPA](https://melpa.org/packages/sdml-mode-badge.svg)](https://melpa.org/#/sdml-mode)
+
 ## Installing
 
-Currently the package is not published and so installation has to be completed
-manually.
+Install is easiest from MELPA, here's how with `use-package`.
+
+```elisp
+(use-package sdml-mode)
+```
+
+Or, interactively.
+
+    M-x package-install RET sdml-mode RET
 
 ### Install manually
 
 First clone the Git repository to a local path.
 
 ```bash
-    git clone https://github.com/johnstonskj/emacs-sdml-mode.git
+git clone https://github.com/johnstonskj/emacs-sdml-mode.git
 ```
 
 The following uses `use-package` but any equivalent package manager should work.
@@ -28,25 +37,27 @@ the core `tree-sitter` package.
   :config (sdml-mode-setup))
 ```
 
+### Tree-Sitter Parser
+
 Additionally you will need to manually install the parser at this time. Start by
 cloning the repository.
 
 ```bash
-    git clone https://github.com/johnstonskj/tree-sitter-sdml.git
+git clone https://github.com/johnstonskj/tree-sitter-sdml.git
 ```
 
 Build just the parser dynamic library, but importantly you need to select a
 specific ABI version.
 
 ```bash
-    TS_GENERATE_ABI=13 make build_parser
+TS_GENERATE_ABI=13 make build_parser
 ```
 
 Finally copy the dynamic library to a location in the path specified by the
 Emacs variable `tree-sitter-load-path`.
 
 ```bash
-    cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
+cp build/libtree-sitter-sdml.dylib ~/.tree-sitter/bin/sdml.dylib
 ```
 
 ## Usage
