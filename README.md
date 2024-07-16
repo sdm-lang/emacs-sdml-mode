@@ -82,6 +82,25 @@ the configuration in the constant `sdml-mode-folding-definitions`.
 Default indentation is two spaces, although this can be overridden by the custom
 variable `sdml-mode-indent-offset`.
 
+## Ctags Support
+
+Using [Universal Ctags](https://ctags.io) and the [sdml-ctags](https://github.com/sdm-lang/sdml-ctags) package provides a tagging solution for
+SDML source. The `sdml-mode-ctags-mode` will determine if [`company-mode`](https://company-mode.github.io/) installed
+and add SDML as a supported tag backend. Additionally, this minor mode provides
+a command to re-create the project's tag file. The image below shows company
+used as the completion UI for type completion when editing.
+
+![Completion](./images/emacs-completion.png)
+
+## Tool Commands
+
+A number of the tools provided by the SDML command-line tool are exposed as
+Emacs commands. The following image shows two tools in use, the module
+dependency tree and the validation tool. The tree view can be refreshed using
+the common binding of `g` and quit with `q`.
+
+[Tool Commands](./images/emacs-tools.png)
+
 ### Abbreviations and Skeletons
 
 This package creates a new `abbrev-table`, named `sdml-mode-abbrev-table`, which
@@ -107,12 +126,13 @@ cursor position.
 Note that for annotation properties with language string values the skeletons
 will add the value of the Emacs variable `locale-language` as the language tag.
 
-### Debugging
+### Default Key Bindings
 
 * `C-c C-s d` -- open the tree-sitter debug view
 * `C-c C-s q` -- open the tree-sitter query builder
 * `C-c C-s t` -- open a dependency tree view
 * `C-c C-s v` -- run the validator in a compilation window
+* `C-c C-s g` -- run u-ctags for the current project
 
 ## Add-Ons
 
