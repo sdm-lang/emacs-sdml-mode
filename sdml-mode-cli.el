@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'ansi-color) ;; built-in
+(require 'seq)
 
 ;; --------------------------------------------------------------------------
 ;; Customization
@@ -53,6 +54,12 @@
   :type '(repeat directory)
   :group 'sdml)
 
+(defcustom sdml-mode-cli-no-color nil
+  "Suppress color output from the command line tool."
+  :tag "Suppress color"
+  :type 'boolean
+  :group 'sdml)
+
 ;; --------------------------------------------------------------------------
 ;; Section heading
 ;; --------------------------------------------------------------------------
@@ -61,62 +68,73 @@
 
 (defconst sdml-mode-cli-default-error-buffer-name "*SDML Command-Line Errors*")
 
-(defun sdml-mode-cli-make-arg (plist-args key &optional arg-name ignore-me)
-  "Make a CLI argument with KEY from PLIST-ARGS."
-  (when (not ignore-me)
-    (let ((value (plist-get plist-args key))
-          (arg-name (if arg-name
-                        arg-name
-                      (substring (symbol-name key) 1))))
-      (if (null value) "" (format "--%s %s" arg-name value)))))
+(defun sdml-mode-cli-make-arg (name value)
+  "Make an argument string from NAME and VALUE."
+  (format "--%s %s" name value))
 
-(defun sdml-mode-cli-make-command (command &rest plist-args)
-  "Make an sdml COMMAND with additional PLIST-ARGS."
-  (interactive)
-  (when (derived-mode-p 'sdml-mode)
+(defun sdml-mode-cli-make-command (command &rest args)
+  "Make an sdml COMMAND with additional ARGS."
+  (when (or t (derived-mode-p 'sdml-mode))
     (let* ((cli-name (or sdml-mode-cli-name "sdml"))
            (cmd-name (executable-find cli-name))
-           (file-name (buffer-file-name (current-buffer))))
+           (pre-args (list
+                      cmd-name
+                      (sdml-mode-cli-make-arg 'log-filter sdml-mode-cli-log-filter)
+                      (if sdml-mode-cli-no-color "--no-color" nil)
+                      command))
+           (args (mapcar (lambda (arg) (cond
+                                   ((eq arg 'current-buffer)
+                                    (sdml-mode-cli-make-arg 'input (buffer-file-name)))
+                                   (t arg)))
+                         args)))
       (cond
        ((null cmd-name)
         (message "couldn't find the sdml cli: %s" cli-name))
-       ((null file-name)
-        (message "buffer doesn't have a file name"))
        (t
-        (string-join
-         (list cmd-name
-               (sdml-mode-cli-make-arg plist-args :log-filter)
-               command
-               (sdml-mode-cli-make-arg plist-args :validation-level "level" (not (string= command "validate")))
-               (sdml-mode-cli-make-arg plist-args :depth nil (not (string= command "deps")))
-               (sdml-mode-cli-make-arg plist-args :output-format)
-               (sdml-mode-cli-make-arg plist-args :output-file)
-               (or (sdml-mode-cli-make-arg plist-args :input-file)
-                   (let ((arg-value (plist-get plist-args :input-module)))
-                     (if (null arg-value) "" arg-value))))
-         " "))))))
+        (string-join (append pre-args args) " "))))))
 
+(defun sdml-mode-cli--make-refresh-cmd (cmd env out err)
+  "Return a lambda to refresh the output buffer from a command.
+CMD is the command-line to run, ENV is the environment variables
+to add, OUT is the output buffer and ERR the error buffer."
+  (lambda ()
+    (interactive)
+    (setq buffer-read-only nil)
+    (delete-region  (point-min) (point-max))
+    (with-environment-variables (("SDML_PATH" env))
+      (shell-command cmd out err)
+      ;; colorize output
+      (ansi-color-apply-on-region (point-min) (point-max))
+      (setq buffer-read-only t))))
 
-(defun sdml-mode-cli-run-command (command &optional output-buffer-name error-buffer-name)
+(defun sdml-mode-cli-run-command (command &optional output-buffer-name error-buffer-name refresh-fn)
   "Run COMMAND with output to OUTPUT-BUFFER-NAME and ERROR-BUFFER-NAME.
 
-If not specified `output-buffer-name' is set to
-`sdml-cli-default-output-buffer-name' and `error-buffer-name' is set
-to `sdml-cli-default-error-buffer-name'."
-  (let ((output-buffer-name (or output-buffer-name sdml-mode-cli-default-output-buffer-name))
-        (current-load-path (or (getenv "SDML_PATH") "")))
-    (with-environment-variables (("SDML_PATH" (concat current-load-path
-                                                      (string-join sdml-mode-cli-load-path ":"))))
-      (with-output-to-temp-buffer output-buffer-name
-        (shell-command command
-                       output-buffer-name
-                       (or error-buffer-name sdml-mode-cli-default-error-buffer-name))
-        (pop-to-buffer output-buffer-name)
-        ;; colorize output
-        (ansi-color-apply-on-region (point-min) (point-max))
-        ;; make read-only
-        (special-mode)))))
+If not specified OUTPUT-BUFFER-NAME is set to
+`sdml-cli-default-output-buffer-name' and ERROR-BUFFER-NAME is set
+to `sdml-cli-default-error-buffer-name'.
 
+The boolean REFRESH-FN indicates that a refresh function should
+be added to the buffer with a key binding to \"g\"."
+  (let ((output-buffer-name (or output-buffer-name sdml-mode-cli-default-output-buffer-name))
+        (load-path (concat (or (getenv "SDML_PATH") "")
+                           (string-join sdml-mode-cli-load-path ":"))))
+    (with-environment-variables (("SDML_PATH" load-path))
+      (shell-command command
+                     output-buffer-name
+                     (or error-buffer-name sdml-mode-cli-default-error-buffer-name))
+      (pop-to-buffer output-buffer-name)
+      ;; colorize output
+      (ansi-color-apply-on-region (point-min) (point-max))
+      ;; make read-only
+      (special-mode)
+      (when refresh-fn
+        ;; install refresh command
+        (use-local-map (copy-keymap special-mode-map))
+        (local-set-key "g" (sdml-mode-cli--make-refresh-cmd command
+                                                            load-path
+                                                            output-buffer-name
+                                                            error-buffer-name))))))
 
 (provide 'sdml-mode-cli)
 

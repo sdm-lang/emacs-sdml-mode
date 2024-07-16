@@ -111,6 +111,8 @@ will add the value of the Emacs variable `locale-language` as the language tag.
 
 * `C-c C-s d` -- open the tree-sitter debug view
 * `C-c C-s q` -- open the tree-sitter query builder
+* `C-c C-s t` -- open a dependency tree view
+* `C-c C-s v` -- run the validator in a compilation window
 
 ## Add-Ons
 
@@ -131,12 +133,26 @@ including:
 * `package-lint`
 * `checkdoc`
 
+Automated checks are done in the Github action workflow using Eldev.
+
 ## License
 
 This package is released under the Apache License, Version 2.0. See the LICENSE
 file in the repository for details.
 
 ## Changes
+
+### Version 0.1.9
+
+* Feature: added new `sdml-mode-ctags-mode` minor mode that provides a command to
+  generate tag files using [Universal Ctags](https://ctags.io/).
+* Feature: added a refresh command, bound to `g`, to the dependency tree view.
+* Refactor: module `sdml-mode-cli` now more generic for other clients.
+* Build: reworked the Eldev workflow for Github actions.
+* Fix: regex for compilation mode, error tracking in validation command now
+  working correctly.
+* Fix: added guard to commands to be relevant only in `sdml-mode`.
+* Fix: removed `property_def` rule from highlighting.
 
 ### Version 0.1.8
 

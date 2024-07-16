@@ -16,6 +16,7 @@ jobs:
     runs-on: ${{matrix.os}}
     continue-on-error: ${{matrix.emacs_version == 'snapshot' || (matrix.emacs_version == '29.4' && matrix.os == 'windows-latest')}}
     env:
+      ELDEV: eldev
       ELDEV_ARGS: --debug --trace --time --backtrace-on-abort --color
 
     steps:
@@ -31,14 +32,14 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Ensure that copyright notices are up-to-date
-      run: eldev $ELDEV_ARGS doctor up-to-date-copyright --all-tests
+      run: ${ELDEV} "${ELDEV_ARGS} doctor up-to-date-copyright --all-tests"
 
     - name: Lint the project
-      run: eldev $ELDEV_ARGS lint
+      run: ${ELDEV} "${ELDEV_ARGS} lint"
 
     - name: Compile the project
-      run: eldev $ELDEV_ARGS compile --warnings-as-errors
+      run: ${ELDEV} "${ELDEV_ARGS} compile --warnings-as-errors"
 
     - name: Test the project
       # Add --expect 10 to ensure a minimum number of tests!
-      run: eldev $ELDEV_ARGS test
+      run: ${ELDEV} "${ELDEV_ARGS} test"

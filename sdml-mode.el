@@ -1,7 +1,7 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.8
+;; Version: 0.1.9
 ;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
@@ -116,6 +116,7 @@
 
 (require 'sdml-mode-abbrev)
 (require 'sdml-mode-cli)
+(require 'sdml-mode-ctags)
 (require 'sdml-mode-hl)
 (require 'sdml-mode-indent)
 
@@ -170,24 +171,39 @@ platform-specific extension in `tree-sitter-load-suffixes'."
     (add-to-list 'tree-sitter-major-mode-language-alist
                  '(sdml-mode . sdml))))
 
-
 ;; --------------------------------------------------------------------------
 ;; Buffer Commands  Validation
 ;; --------------------------------------------------------------------------
 
 (defconst sdml-mode-validation-error-regexp
-  "^\\(?:\\(bug\\|error\\)\\|\\(warning\\)\\|\\(help\\|note\\)\\)\\[\\([BEIW][[:digit:]]\\{4\\}\\)]: .*
-\\(?:^  ┌─ \\([^:]+\\):\\([[:digit:]]+\\):\\([[:digit:]]+\\)\\)")
+  (rx bol
+      (or (group (or "bug" "error")) (group "warning") (group (or "help" "note")))
+      ?\[ (char "BEWI") (= 4 digit) ?\] ?: (* (char " \t"))
+      (group (+ (not ?\n))) ?\n
+      "   ┌─ "
+      (group (+ (not ?:)))
+      ?:
+      (group (+ digit))
+      ?:
+      (group (+ digit))
+      ?\n))
+
+(defun sdml-mode--command-setup ()
+  "Setup buffer commands."
+  (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
+  (setq-local ansi-color-for-compilation-mode t)
+  (add-to-list 'compilation-error-regexp-alist-alist
+               `(sdml ,sdml-mode-validation-error-regexp 5 6 7 (2 . 3)))
+  (add-to-list 'compilation-error-regexp-alist 'sdml))
 
 (defun sdml-mode-validate-current-buffer ()
   "Validate the current buffer using the `compile' command."
-  (interactive)
+  (interactive nil sdml-mode)
   (when (derived-mode-p 'sdml-mode)
     (let ((cmd-line (sdml-mode-cli-make-command
                      "validate"
-                     :log-filter sdml-mode-cli-log-filter
-                     :validation-level sdml-mode-validation-level
-                     :input-file (buffer-file-name (current-buffer)))))
+                     (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
+                     'current-buffer)))
       (when cmd-line
         (compile cmd-line)))))
 
@@ -196,23 +212,16 @@ platform-specific extension in `tree-sitter-load-suffixes'."
 ;; Buffer Commands  Dependencies
 ;; --------------------------------------------------------------------------
 
-(defun sdml-mode-current-buffer-dependencies ()
-  "Dependencies of the current buffer."
-  (interactive)
+(defun sdml-mode-current-buffer-dependency-tree (depth)
+  "Dependency of the current buffer, to a max DEPTH."
+  (interactive "nMax depth of tree (0=all): " sdml-mode)
   (when (derived-mode-p 'sdml-mode)
     (let ((cmd-line (sdml-mode-cli-make-command
                      "deps"
-                     :log-filter sdml-mode-cli-log-filter
-                     :input-file (buffer-file-name (current-buffer)))))
+                     (sdml-mode-cli-make-arg 'depth depth)
+                     'current-buffer)))
       (when cmd-line
-        (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*")))))
-
-(defun sdml-mode-buffer-commands-setup ()
-  "Setup buffer commands."
-  (setq-local ansi-color-for-compilation-mode t)
-  (add-to-list 'compilation-error-regexp-alist-alist
-               `(sdml ,sdml-mode-validation-error-regexp 5 6 7 (2 . 3)))
-  (add-to-list 'compilation-error-regexp-alist  'sdml))
+        (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*" nil t)))))
 
 
 ;; --------------------------------------------------------------------------
@@ -223,8 +232,8 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-s d") 'tree-sitter-debug-mode)
     (define-key map (kbd "C-c C-s q") 'tree-sitter-query-builder)
-    (define-key map (kbd "C-c C-s v") 'sdml-validate-current-buffer)
-    (define-key map (kbd "C-c C-s t") 'sdml-current-buffer-dependencies)
+    (define-key map (kbd "C-c C-s v") 'sdml-mode-validate-current-buffer)
+    (define-key map (kbd "C-c C-s t") 'sdml-mode-current-buffer-dependency-tree)
     map)
   "Keymap for SDML major mode.")
 
@@ -288,8 +297,11 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   ;; tree-sitter indentation support
   (sdml-mode-indent-mode 1)
 
+  ;; add Universal Ctags support
+  (sdml-mode-ctags-mode 1)
+
   ;; enable the validation command based on the builtin `compile'.
-  (sdml-mode-buffer-commands-setup))
+  (sdml-mode--command-setup))
 
 
 ;;;###autoload
