@@ -66,7 +66,7 @@
 ;; by `sdml-mode' and when typing one of the abbreviations below type space to
 ;; expand.
 ;;
-;; Typing `d t SPC' will prompt for a name and expand into the SDML declaration
+;; Typing `d t SPCA' will prompt for a name and expand into the SDML declaration
 ;; `datatype MyName ← opaque _' where the underscore character represents the new
 ;; cursor position.
 ;;
@@ -92,7 +92,7 @@
 ;;
 ;; `(add-hook 'after-save-hook 'sdml-validate-current-buffer)'
 ;;
-;; `sdml-mode-current-buffer-dependencies' (\\[sdml-mode-current-buffer-dependencies])
+;; `sdml-mode-current-buffer-dependency-tree' (\\[sdml-mode-current-buffer-dependency-tree])
 ;; to display the dependencies of the curtent buffer's module.
 ;;
 
@@ -132,7 +132,7 @@
 
 (defcustom sdml-mode-prettify-symbols-alist
   '(("->" . ?→) ("<-" . ?←) ("forall" ?∀) ("exists" ?∃) ("in" ?∈) (":=" ?≔))
-  "An alist of symbol prettifications used for `prettify-symbols-alist'."
+  "An alist of symbol replacements used for `prettify-symbols-alist'."
   :tag "Symbol mapping for prettify"
   :type '(repeat (cons string character))
   :group 'sdml)
@@ -154,7 +154,7 @@
 ;; --------------------------------------------------------------------------
 
 (defun sdml-mode--tree-sitter-setup (&optional dylib-file)
-  "Load and connect the parser library in DYLIB-FILE.
+  "Internal: Load and connect the parser library in DYLIB-FILE.
 
 Load the dynamic library, either with the explicit path
 in DYLIB-FILE, or by searching the path in `tree-sitter-load-path'.
@@ -189,16 +189,15 @@ platform-specific extension in `tree-sitter-load-suffixes'."
       ?\n))
 
 (defun sdml-mode--command-setup ()
-  "Setup buffer commands."
+  "Internal: Setup buffer commands."
   (add-hook 'compilation-filter-hook 'ansi-color-compilation-filter)
   (setq-local ansi-color-for-compilation-mode t)
   (add-to-list 'compilation-error-regexp-alist-alist
                `(sdml ,sdml-mode-validation-error-regexp 5 6 7 (2 . 3)))
   (add-to-list 'compilation-error-regexp-alist 'sdml))
 
-(defun sdml-mode-validate-file (file-name)
-  "Validate FILE-NAME using the `compile' command."
-  (interactive "fSDML File name: " sdml-mode)
+(defun sdml-mode--exec-validator (file-name)
+  "Internal: execute the command-line validator for FILE-NAME."
   (let ((cmd-line (sdml-mode-cli-make-command
                    "validate"
                    (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
@@ -206,31 +205,76 @@ platform-specific extension in `tree-sitter-load-suffixes'."
     (when cmd-line
       (compile cmd-line))))
 
+(defun sdml-mode-validate-file (file-name)
+  "Validate FILE-NAME using the `compile' command.
+
+This command executes the SDML command-line tool's validation
+tool, on the file FILE-NAME, using the value of
+`sdml-mode-validation-level' to determine the level of messages
+output. The command uses the `compile' function and the resulting
+window supports error navigation and source highlighting as
+usual."
+  (interactive "fSDML File name: ")
+  (sdml-mode--exec-validator file-name))
+
 (defun sdml-mode-validate-current-buffer ()
-  "Validate the current buffer using the `compile' command."
+  "Validate the current buffer using the `compile' command.
+
+This command executes the SDML command-line tool's validation
+tool, on the current buffer's underlying file, using the value of
+`sdml-mode-validation-level' to determine the level of messages
+output. The command uses the `compile' function and the resulting
+window supports error navigation and source highlighting as
+usual."
   (interactive nil sdml-mode)
-  (let ((cmd-line (sdml-mode-cli-make-command
-                   "validate"
-                   (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
-                   'current-buffer)))
-    (when cmd-line
-      (compile cmd-line))))
+  (sdml-mode--exec-validator (buffer-file-name)))
 
 
 ;; --------------------------------------------------------------------------
 ;; Buffer Commands  Dependencies
 ;; --------------------------------------------------------------------------
 
+
+(defun sdml-mode-current-buffer-dependency-graph ()
+  "Show full dependency graph in SVG of the current buffer.
+
+This command generates an SVG representing the current buffer's
+dependencies as a directed graph. The command uses the SDML
+command-line tool to generate a temporary file which is then
+opened in a new window. The resulting image window may be dismissed
+using the key `q'."
+  (interactive nil sdml-mode)
+  (cond
+   (window-system
+    (let* ((output-file-name (concat (make-temp-file "sdml-mode") ".svg"))
+           (cmd-line (sdml-mode-cli-make-command
+                      "deps"
+                      (sdml-mode-cli-make-arg 'output output-file-name)
+                      (sdml-mode-cli-make-arg 'output-format 'graph)
+                      (sdml-mode-cli-make-arg 'depth 0)
+                      'current-buffer)))
+      (when cmd-line
+        (sdml-mode-cli-run-command cmd-line)
+        (find-file-other-window output-file-name))))
+   (t (message "Command only available if window-system is set"))))
+
 (defun sdml-mode-current-buffer-dependency-tree (depth)
-  "Dependency of the current buffer, to a max DEPTH."
+  "Show the dependency tree of the current buffer, to a max DEPTH.
+
+This command generates a textual tree representing the current
+buffer's dependencies. The command uses the SDML command-line
+tool to generate the tree, using DEPTH to denote how many levels
+of dependencies to display. The resulting window may be dismissed
+using the key `q', and it's content may be refreshed with the key
+`g'."
   (interactive "nMax depth of tree (0=all): " sdml-mode)
-  (when (derived-mode-p 'sdml-mode)
-    (let ((cmd-line (sdml-mode-cli-make-command
+  (let ((cmd-line (sdml-mode-cli-make-command
                      "deps"
+                     (sdml-mode-cli-make-arg 'output-format 'tree)
                      (sdml-mode-cli-make-arg 'depth depth)
                      'current-buffer)))
       (when cmd-line
-        (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*" nil t)))))
+        (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*" nil t))))
 
 
 ;; --------------------------------------------------------------------------
@@ -242,8 +286,9 @@ platform-specific extension in `tree-sitter-load-suffixes'."
     (define-key map (kbd "C-c C-s d") 'tree-sitter-debug-mode)
     (define-key map (kbd "C-c C-s q") 'tree-sitter-query-builder)
     (define-key map (kbd "C-c C-s v") 'sdml-mode-validate-current-buffer)
-    (define-key map (kbd "C-c C-s V") 'sdml-mode-validate-file)
+    (define-key map (kbd "C-c C-s M-v") 'sdml-mode-validate-file)
     (define-key map (kbd "C-c C-s t") 'sdml-mode-current-buffer-dependency-tree)
+    (define-key map (kbd "C-c C-s M-t") 'sdml-mode-current-buffer-dependency-graph)
     map)
   "Keymap for SDML major mode.")
 
@@ -267,7 +312,16 @@ platform-specific extension in `tree-sitter-load-suffixes'."
   sdml-mode
   prog-mode
   "SDML"
-  "Major mode for editing SDML files.
+  "A major mode for editing SDML (Simple Domain Modeling Language) files.
+
+This major mode will, by default, enable the following minor modes:
+
+- `abbrev-mode'
+- `prettify-symbols-mode' (see `sdml-mode-prettify-symbols-alist')
+- `tree-sitter-mode'
+- `sdml-mode-hl-mode'
+- `sdml-mode-indent-mode'
+- `sdml-mode-ctags-mode'
 
   Key bindings:
   \\{sdml-mode-map}"

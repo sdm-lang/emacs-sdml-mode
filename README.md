@@ -113,11 +113,20 @@ dependency tree and the validation tool.
   usual `C-u` binding.
 * The resulting tree view can be refreshed using the common binding of `g` and quit
   with `q`.
+  
+### Dependency Graph
+
+If running under a `window-sytem` it is also possible to display the current
+buffer's dependencies as a directed graph. The tool will generate an SVG and
+display in a read-only window.
+
+* Command  `sdml-mode-current-buffer-dependency-graph` has the default binding `C-c
+  C-s M-t`.
 
 ### Full Validation
 
 * Command `sdml-mode-validate-current-buffer` has the default binding `C-c C-s v`.
-* Command `sdml-mode-validate` has the default binding `C-c C-s V`.
+* Command `sdml-mode-validate` has the default binding `C-c C-s M-v`.
 * The variable `sdml-mode-validation-level` denotes the level of messages produced
   by the validator, with a default of `warnings`.
 * The output uses the standard `compilation-mode` with all the common bindings are
@@ -148,6 +157,13 @@ cursor position.
 Note that for annotation properties with language string values the skeletons
 will add the value of the Emacs variable `locale-language` as the language tag.
 
+## Prettify Symbol
+
+The variable `sdml-mode-prettify-symbols-alist` specifies a set of symbols that
+may visually replace certain keywords or multi-character symbols in SDML source.
+For example the characters `"->"` may be replaced by the Unicode character `→`
+or the keyword `"forall"` replaced with the Unicode `∀`.
+
 ### Default Key Bindings
 
 * `C-c C-s d` -- open the tree-sitter debug view
@@ -155,7 +171,7 @@ will add the value of the Emacs variable `locale-language` as the language tag.
 * `C-c C-s t` -- open a dependency tree view for the current buffer
 * `C-c C-s v` -- run the validator, on the current buffer, and show the results in
   a compilation window
-* `C-c C-s V` -- run the validator, on a specified file, and show the results in
+* `C-c C-s M-v` -- run the validator, on a specified file, and show the results in
   a compilation window
 * `C-c C-s T` -- run u-ctags for the current project
 
