@@ -63,8 +63,20 @@
 
 (defun sdml-mode-ctags-tag-file-path (&optional file-path)
   "Return a path to a tag file for the current buffer.
-If FILE-PATH is provided the tag file is found relative to that
-path instead."
+
+If FILE-PATH is not provided the file name of the current buffer is used
+instead.
+
+If the `company-ctags' package is loaded, use the function
+`company-ctags-find-table' to find a tag file location.
+
+If the `projectile' package is loaded, use the variable
+`projectile-project-root' to determine the directory in which to
+put the tag file named `sdml-mode-ctags-output-file-name'.
+
+If neither of these are present the directory containing FILE-NAME
+will be used as the location for the tag file named
+ `sdml-mode-ctags-output-file-name'."
   (let* ((current-buffer-dir (file-name-directory
                               (or file-path (buffer-file-name))))
          (fallback (concat current-buffer-dir
@@ -78,10 +90,25 @@ path instead."
         (t fallback))))
 
 (defun sdml-mode-ctags-generate ()
-  "Generate a TAGS file for the current SDML project."
+  "Generate a TAGS file for the current SDML project.
+
+This command executes the Universal Ctags executable specified in
+`sdml-mode-ctags-command' to create a tag file determined by the
+function `sdml-mode-ctags-tag-file-path'."
   (interactive)
   (let ((tag-file-path (sdml-mode-ctags-tag-file-path)))
     (shell-command (format "%s -R -e -o %s" sdml-mode-ctags-command tag-file-path))))
+
+
+;; --------------------------------------------------------------------------
+;; Key Bindings
+;; --------------------------------------------------------------------------
+
+(defvar sdml-mode-ctags-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-s g") 'sdml-mode-ctags-generate))
+  "Key map for SDML ctags minor mode.")
+
 
 ;; --------------------------------------------------------------------------
 ;; Ctags Minor Mode
@@ -90,7 +117,10 @@ path instead."
 ;;;###autoload
 (define-minor-mode
   sdml-mode-ctags-mode
-  "Minor mode to provide tagging of SDML source."
+  "Minor mode to provide tagging of SDML source.
+
+Key bindings:
+  \\{sdml-mode-ctags-mode-map}"
 
   :group 'sdml
 
@@ -98,9 +128,9 @@ path instead."
 
   :lighter nil
 
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-s T") 'sdml-mode-ctags-generate)
-    (add-to-list 'minor-mode-map-alist (cons 'sdml-mode-ctags-mode map)))
+  (add-to-list 'minor-mode-map-alist
+               (cons 'sdml-mode-ctags-mode
+                     sdml-mode-ctags-mode-map))
 
   (when (featurep 'company-ctags)
     (add-to-list 'company-ctags-modes 'sdml-mode)))

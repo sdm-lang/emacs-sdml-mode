@@ -86,14 +86,20 @@
 ;;
 
 ;; `sdml-mode-validate-current-buffer' (\\[sdml-mode-validate-current-buffer]) to
-;; validate and show errors for the buffer's current module.
+;; validate and show errors for the current buffer's module.
 ;;
-;; Adding this as a save-hook allows  validation on every save of a buffer.
+;; Adding this as a save-hook allows validation on every save of a buffer.
 ;;
 ;; `(add-hook 'after-save-hook 'sdml-validate-current-buffer)'
 ;;
+;; `sdml-mode-validate-file' (\\[sdml-mode-validate-file]) to
+;; validate and show errors for a specified file name.
+;;
 ;; `sdml-mode-current-buffer-dependency-tree' (\\[sdml-mode-current-buffer-dependency-tree])
-;; to display the dependencies of the curtent buffer's module.
+;; to display the dependencies of the current buffer's module as a textual tree.
+;;
+;; `sdml-mode-current-buffer-dependency-graph' (\\[sdml-mode-current-buffer-dependency-graph])
+;; to display the dependencies of the current buffer's module as an SVG directed graph.
 ;;
 
 ;; Extensions

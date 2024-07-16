@@ -126,7 +126,7 @@ display in a read-only window.
 ### Full Validation
 
 * Command `sdml-mode-validate-current-buffer` has the default binding `C-c C-s v`.
-* Command `sdml-mode-validate` has the default binding `C-c C-s M-v`.
+* Command `sdml-mode-validate-file` has the default binding `C-c C-s M-v`.
 * The variable `sdml-mode-validation-level` denotes the level of messages produced
   by the validator, with a default of `warnings`.
 * The output uses the standard `compilation-mode` with all the common bindings are
@@ -169,11 +169,12 @@ or the keyword `"forall"` replaced with the Unicode `∀`.
 * `C-c C-s d` -- open the tree-sitter debug view
 * `C-c C-s q` -- open the tree-sitter query builder
 * `C-c C-s t` -- open a dependency tree view for the current buffer
+* `C-c C-s M-t` -- open a dependency graph image for the current buffer
 * `C-c C-s v` -- run the validator, on the current buffer, and show the results in
   a compilation window
 * `C-c C-s M-v` -- run the validator, on a specified file, and show the results in
   a compilation window
-* `C-c C-s T` -- run u-ctags for the current project
+* `C-c C-s g` -- run u-ctags for the current project
 
 ## Add-Ons
 
