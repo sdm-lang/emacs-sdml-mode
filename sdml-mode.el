@@ -196,16 +196,25 @@ platform-specific extension in `tree-sitter-load-suffixes'."
                `(sdml ,sdml-mode-validation-error-regexp 5 6 7 (2 . 3)))
   (add-to-list 'compilation-error-regexp-alist 'sdml))
 
+(defun sdml-mode-validate-file (file-name)
+  "Validate FILE-NAME using the `compile' command."
+  (interactive "fSDML File name: " sdml-mode)
+  (let ((cmd-line (sdml-mode-cli-make-command
+                   "validate"
+                   (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
+                   (sdml-mode-cli-make-arg 'input file-name))))
+    (when cmd-line
+      (compile cmd-line))))
+
 (defun sdml-mode-validate-current-buffer ()
   "Validate the current buffer using the `compile' command."
   (interactive nil sdml-mode)
-  (when (derived-mode-p 'sdml-mode)
-    (let ((cmd-line (sdml-mode-cli-make-command
-                     "validate"
-                     (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
-                     'current-buffer)))
-      (when cmd-line
-        (compile cmd-line)))))
+  (let ((cmd-line (sdml-mode-cli-make-command
+                   "validate"
+                   (sdml-mode-cli-make-arg 'level sdml-mode-validation-level)
+                   'current-buffer)))
+    (when cmd-line
+      (compile cmd-line))))
 
 
 ;; --------------------------------------------------------------------------
@@ -233,6 +242,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
     (define-key map (kbd "C-c C-s d") 'tree-sitter-debug-mode)
     (define-key map (kbd "C-c C-s q") 'tree-sitter-query-builder)
     (define-key map (kbd "C-c C-s v") 'sdml-mode-validate-current-buffer)
+    (define-key map (kbd "C-c C-s V") 'sdml-mode-validate-file)
     (define-key map (kbd "C-c C-s t") 'sdml-mode-current-buffer-dependency-tree)
     map)
   "Keymap for SDML major mode.")

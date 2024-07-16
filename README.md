@@ -92,14 +92,36 @@ used as the completion UI for type completion when editing.
 
 ![Completion](./images/emacs-completion.png)
 
+Command `sdml-mode-ctags-generate` has the default binding `C-c C-s T`. It uses the
+variables `sdml-mode-ctags-command` and `sdml-mode-ctags-output-file-name` to
+generate the tag file.
+
 ## Tool Commands
 
 A number of the tools provided by the SDML command-line tool are exposed as
 Emacs commands. The following image shows two tools in use, the module
-dependency tree and the validation tool. The tree view can be refreshed using
-the common binding of `g` and quit with `q`.
+dependency tree and the validation tool.
 
-[Tool Commands](./images/emacs-tools.png)
+![Tool Commands](./images/emacs-tools.png)
+
+### Dependency Tree
+
+* Command `sdml-mode-current-buffer-dependency-tree` has the default binding `C-c
+  C-s t`.
+* The command will prompt for the maximum depth of the tree where 0 means
+  unbounded. This is a command prefix and can therefore be specified with the
+  usual `C-u` binding.
+* The resulting tree view can be refreshed using the common binding of `g` and quit
+  with `q`.
+
+### Full Validation
+
+* Command `sdml-mode-validate-current-buffer` has the default binding `C-c C-s v`.
+* Command `sdml-mode-validate` has the default binding `C-c C-s V`.
+* The variable `sdml-mode-validation-level` denotes the level of messages produced
+  by the validator, with a default of `warnings`.
+* The output uses the standard `compilation-mode` with all the common bindings are
+  available.
 
 ### Abbreviations and Skeletons
 
@@ -130,9 +152,12 @@ will add the value of the Emacs variable `locale-language` as the language tag.
 
 * `C-c C-s d` -- open the tree-sitter debug view
 * `C-c C-s q` -- open the tree-sitter query builder
-* `C-c C-s t` -- open a dependency tree view
-* `C-c C-s v` -- run the validator in a compilation window
-* `C-c C-s g` -- run u-ctags for the current project
+* `C-c C-s t` -- open a dependency tree view for the current buffer
+* `C-c C-s v` -- run the validator, on the current buffer, and show the results in
+  a compilation window
+* `C-c C-s V` -- run the validator, on a specified file, and show the results in
+  a compilation window
+* `C-c C-s T` -- run u-ctags for the current project
 
 ## Add-Ons
 
