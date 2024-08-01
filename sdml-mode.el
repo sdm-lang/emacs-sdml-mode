@@ -217,7 +217,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
 This command executes the SDML command-line tool's validation
 tool, on the file FILE-NAME, using the value of
 `sdml-mode-validation-level' to determine the level of messages
-output. The command uses the `compile' function and the resulting
+output.  The command uses the `compile' function and the resulting
 window supports error navigation and source highlighting as
 usual."
   (interactive "fSDML File name: ")
@@ -229,7 +229,7 @@ usual."
 This command executes the SDML command-line tool's validation
 tool, on the current buffer's underlying file, using the value of
 `sdml-mode-validation-level' to determine the level of messages
-output. The command uses the `compile' function and the resulting
+output.  The command uses the `compile' function and the resulting
 window supports error navigation and source highlighting as
 usual."
   (interactive nil sdml-mode)
@@ -245,9 +245,9 @@ usual."
   "Show full dependency graph in SVG of the current buffer.
 
 This command generates an SVG representing the current buffer's
-dependencies as a directed graph. The command uses the SDML
+dependencies as a directed graph.  The command uses the SDML
 command-line tool to generate a temporary file which is then
-opened in a new window. The resulting image window may be dismissed
+opened in a new window.  The resulting image window may be dismissed
 using the key `q'."
   (interactive nil sdml-mode)
   (cond
@@ -268,9 +268,9 @@ using the key `q'."
   "Show the dependency tree of the current buffer, to a max DEPTH.
 
 This command generates a textual tree representing the current
-buffer's dependencies. The command uses the SDML command-line
+buffer's dependencies.  The command uses the SDML command-line
 tool to generate the tree, using DEPTH to denote how many levels
-of dependencies to display. The resulting window may be dismissed
+of dependencies to display.  The resulting window may be dismissed
 using the key `q', and it's content may be refreshed with the key
 `g'."
   (interactive "nMax depth of tree (0=all): " sdml-mode)

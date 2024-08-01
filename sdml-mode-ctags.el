@@ -106,9 +106,9 @@ function `sdml-mode-ctags-tag-file-path'."
 
 (defvar sdml-mode-ctags-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-s g") 'sdml-mode-ctags-generate))
+    (define-key map (kbd "C-c C-s g") 'sdml-mode-ctags-generate)
+    map)
   "Key map for SDML ctags minor mode.")
-
 
 ;; --------------------------------------------------------------------------
 ;; Ctags Minor Mode
@@ -120,7 +120,7 @@ function `sdml-mode-ctags-tag-file-path'."
   "Minor mode to provide tagging of SDML source.
 
 Key bindings:
-  \\{sdml-mode-ctags-mode-map}"
+  {sdml-mode-ctags-mode-map}"
 
   :group 'sdml
 
@@ -133,7 +133,7 @@ Key bindings:
                      sdml-mode-ctags-mode-map))
 
   (when (featurep 'company-ctags)
-    (add-to-list 'company-ctags-modes 'sdml-mode)))
+    (add-to-list 'company-ctags-modes 'sdml-mode-ctags-mode)))
 
 (provide 'sdml-mode-ctags)
 
