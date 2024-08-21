@@ -45,19 +45,17 @@
 ;;
 ;; Installing
 ;;
-;; `(use-package sdml-mode
-;;    :ensure t)'
+;; Install is easiest from MELPA, here's how with `use-package`.
+;;
+;; `(use-package sdml-mode)'
+;;
+;; Or, interactively; `M-x package-install RET sdml-ispell RET'
 
 ;;
 ;; Usage
 ;;
 ;; Once installed the major mode should be used for any file ending in `.sdm'
 ;; or `.sdml' with highlighting and indentation support.
-
-;; Debug
-;;
-;; `\\[tree-sitter-debug-mode]' -- open tree-sitter debug view
-;; `\\[tree-sitter-query-builder]' -- open tree-sitter query builder
 
 ;; Abbreviations and Skeletons
 ;;
@@ -80,7 +78,6 @@
 ;;
 ;; Datatypes: db=boolean, dd=decimal, df=double, dh=binary, di=integer,
 ;;   sd=string, du=unsigned
-;;
 
 ;; Interactive Commands
 ;;
@@ -101,6 +98,11 @@
 ;; `sdml-mode-current-buffer-dependency-graph' (\\[sdml-mode-current-buffer-dependency-graph])
 ;; to display the dependencies of the current buffer's module as an SVG directed graph.
 ;;
+
+;; Debug
+;;
+;; `\\[tree-sitter-debug-mode]' -- open tree-sitter debug view
+;; `\\[tree-sitter-query-builder]' -- open tree-sitter query builder
 
 ;; Extensions
 ;;

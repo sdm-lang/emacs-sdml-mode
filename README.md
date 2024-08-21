@@ -15,9 +15,7 @@ Install is easiest from MELPA, here's how with `use-package`.
 (use-package sdml-mode)
 ```
 
-Or, interactively.
-
-    M-x package-install RET sdml-mode RET
+Or, interactively; `M-x package-install RET sdml-mode RET`
 
 ### Install manually
 
@@ -28,8 +26,6 @@ git clone https://github.com/sdm-lang/emacs-sdml-mode.git
 ```
 
 The following uses `use-package` but any equivalent package manager should work.
-The function `sdml-mode-setup` ensures the installation of the SDML parser with
-the core `tree-sitter` package.
 
 ```elisp
 (use-package sdml-mode
@@ -188,14 +184,17 @@ or the keyword `"forall"` replaced with the Unicode `∀`.
 
 ## Contributing
 
-The packages in this repository should pass the standard package checks,
-including:
+This package includes an [Eldev](https://github.com/emacs-eldev/eldev) file and the following MUST be run before
+creating any PR.
 
-* `byte-compile-file`
-* `package-lint`
-* `checkdoc`
+- `eldev lint`
+- `eldev doctor`
+- `eldev package --load-before-compiling --stop-on-failure --warnings-as-errors`
+- `eldev test`
+- `eldev test --undercover auto,coveralls,merge,dontsent -U simplecov.json`
+- `eldev release -nU 9.9.9`
 
-Automated checks are done in the Github action workflow using Eldev.
+The script [eldev-check.sh](https://gist.github.com/johnstonskj/6af5ef6866bfb1288f4962a6ba3ef418) may be useful to you if you do not have your own Eldev workflow.
 
 ## License
 
