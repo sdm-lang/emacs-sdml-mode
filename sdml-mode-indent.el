@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Internal module.
+;; Minor mode to provide indentation when editing SDML (sdml-mode) source.
 
 ;;; Code:
 
@@ -101,7 +101,7 @@
 ;;;###autoload
 (define-minor-mode
   sdml-mode-indent-mode
-  "Minor mode to provide indentation in SDML editing."
+  "Minor mode to provide indentation when editing SDML source."
 
   :group 'sdml
 

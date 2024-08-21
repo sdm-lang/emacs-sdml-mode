@@ -20,12 +20,12 @@
 
 ;;; Commentary:
 
+;; Minor mode to provide tagging of SDML (sdml-mode) source.
+;;
 ;; To enable SDML tagging you will need to install the Universal Ctags
 ;; configuration file from:
 ;;
 ;;     https://github.com/sdm-lang/sdml-ctags
-;;
-;; Internal module.
 
 ;;; Code:
 

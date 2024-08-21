@@ -20,7 +20,7 @@
 
 ;;; Commentary:
 
-;; Internal module.
+;; Minor mode to provide highlighting of SDML (sdml-mode) source.
 
 ;;; Code:
 
