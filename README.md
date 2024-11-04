@@ -107,8 +107,8 @@ dependency tree and the validation tool.
 * The command will prompt for the maximum depth of the tree where 0 means
   unbounded. This is a command prefix and can therefore be specified with the
   usual `C-u` binding.
-* The resulting tree view can be refreshed using the common binding of `g` and quit
-  with `q`.
+* The resulting tree view can be refreshed using the common binding of `g` and
+  quit with `q`.
   
 ### Dependency Graph
 
@@ -116,7 +116,7 @@ If running under a `window-sytem` it is also possible to display the current
 buffer's dependencies as a directed graph. The tool will generate an SVG and
 display in a read-only window.
 
-* Command  `sdml-mode-current-buffer-dependency-graph` has the default binding `C-c
+* Command `sdml-mode-current-buffer-dependency-graph` has the default binding `C-c
   C-s M-t`.
 
 ### Full Validation
@@ -194,7 +194,8 @@ creating any PR.
 - `eldev test --undercover auto,coveralls,merge,dontsent -U simplecov.json`
 - `eldev release -nU 9.9.9`
 
-The script [eldev-check.sh](https://gist.github.com/johnstonskj/6af5ef6866bfb1288f4962a6ba3ef418) may be useful to you if you do not have your own Eldev workflow.
+The script [eldev-check.sh](https://gist.github.com/johnstonskj/6af5ef6866bfb1288f4962a6ba3ef418) may be useful to you if you do not have your own Eldev
+workflow.
 
 ## License
 
@@ -205,7 +206,8 @@ file in the repository for details.
 
 ### Version 0.2.0
 
-* Feature: update the grammar support for the underlying 0.4.0 release of tree-sitter-sdml.
+* Feature: update the grammar support for the underlying 0.4.0 release of
+  tree-sitter-sdml.
 
 ### Version 0.1.9
 
