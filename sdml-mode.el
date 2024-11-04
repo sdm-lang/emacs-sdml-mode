@@ -1,8 +1,8 @@
 ;;; sdml-mode.el --- Major mode for SDML -*- lexical-binding: t; -*-
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
-;; Version: 0.1.9
-;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.3"))
+;; Version: 0.2.0
+;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.4"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
 
@@ -180,7 +180,7 @@ platform-specific extension in `tree-sitter-load-suffixes'."
                  '(sdml-mode . sdml))))
 
 ;; --------------------------------------------------------------------------
-;; Buffer Commands  Validation
+;; Commands  Validation
 ;; --------------------------------------------------------------------------
 
 (defconst sdml-mode-validation-error-regexp
@@ -239,7 +239,7 @@ usual."
 
 
 ;; --------------------------------------------------------------------------
-;; Buffer Commands  Dependencies
+;; Commands  Dependencies
 ;; --------------------------------------------------------------------------
 
 
@@ -284,6 +284,103 @@ using the key `q', and it's content may be refreshed with the key
       (when cmd-line
         (sdml-mode-cli-run-command cmd-line "*SDML Dependencies*" nil t))))
 
+
+;; --------------------------------------------------------------------------
+;; Commands  Placeholders
+;; --------------------------------------------------------------------------
+
+(defun sdml-mode-document-module ()
+  "Generate standard documentation for module in current buffer."
+  (interactive nil sdml-mode)
+  (let* ((inp-file (buffer-file-name))
+         (out-file (if (null inp-file) "-"
+                     (concat (file-name-sans-extension inp-file) ".org")))
+         (out-buffer (if (null inp-file) "*SDML Documentation*" nil)))
+    (let ((cmd-line (sdml-mode-cli-make-command
+                     "doc"
+                     (sdml-mode-cli-make-arg 'output-format 'org-mode)
+                     (sdml-mode-cli-make-arg 'output out-file)
+                     'current-buffer)))
+      (when cmd-line
+        (sdml-mode-cli-run-command cmd-line out-buffer nil t)
+        (cond
+         ((not (null out-buffer))
+          (with-current-buffer out-buffer
+            (org-mode)))
+         ((not (eq out-file "-"))
+          (find-file out-file)))))))
+
+(defun sdml-mode-document-project ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
+
+(defun sdml-mode-draw-concept ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
+
+(defun sdml-mode-draw-entities ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
+
+(defun sdml-mode-draw-uml ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
+
+(defun sdml-mode-generate-rdf ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
+
+(defun sdml-mode-generate-scheme ()
+  "Generate Scheme representation of the current buffer."
+  (interactive nil sdml-mode)
+  (let* ((inp-file (buffer-file-name))
+         (out-file (if (null inp-file) "-"
+                     (concat (file-name-sans-extension inp-file) ".scm")))
+         (out-buffer (if (null inp-file) "*SDML Parse-tree Scheme*" nil)))
+    (let ((cmd-line (sdml-mode-cli-make-command
+                     "convert"
+                     (sdml-mode-cli-make-arg 'output-format 's-expr)
+                     (sdml-mode-cli-make-arg 'output out-file)
+                     'current-buffer)))
+      (when cmd-line
+        (sdml-mode-cli-run-command cmd-line out-buffer nil t)
+        (cond
+         ((and (not (null out-buffer)) (featurep 'scheme-mode))
+          (with-current-buffer out-buffer
+            (scheme-mode)))
+         ((not (eq out-file "-"))
+          (find-file out-file)))))))
+
+(defun sdml-mode-generate-json ()
+  "Generate JSON representation of current buffer."
+  (interactive nil sdml-mode)
+  (let* ((inp-file (buffer-file-name))
+         (out-file (if (null inp-file) "-"
+                     (concat (file-name-sans-extension inp-file) ".json")))
+         (out-buffer (if (null inp-file) "*SDML Parse-tree JSON*" nil)))
+    (let ((cmd-line (sdml-mode-cli-make-command
+                     "convert"
+                     (sdml-mode-cli-make-arg 'output-format 'json-pretty)
+                     (sdml-mode-cli-make-arg 'output out-file)
+                     'current-buffer)))
+      (when cmd-line
+        (sdml-mode-cli-run-command cmd-line out-buffer nil t)
+        (cond
+         ((and (not (null out-buffer)) (featurep 'json-mode))
+          (with-current-buffer out-buffer
+            (json-mode)))
+         ((not (eq out-file "-"))
+          (find-file out-file)))))))
+
+(defun sdml-mode-generate-with-tera ()
+  "Do something."
+  (interactive nil sdml-mode)
+  t)
 
 ;; --------------------------------------------------------------------------
 ;; Key Bindings

@@ -116,25 +116,27 @@ to `sdml-cli-default-error-buffer-name'.
 
 The boolean REFRESH-FN indicates that a refresh function should
 be added to the buffer with a key binding to \"g\"."
-  (let ((output-buffer-name (or output-buffer-name sdml-mode-cli-default-output-buffer-name))
+  (let ((is-special (null output-buffer-name))
+        (output-buffer-name (or output-buffer-name sdml-mode-cli-default-output-buffer-name))
         (load-path (concat (or (getenv "SDML_PATH") "")
                            (string-join sdml-mode-cli-load-path ":"))))
     (with-environment-variables (("SDML_PATH" load-path))
       (shell-command command
                      output-buffer-name
                      (or error-buffer-name sdml-mode-cli-default-error-buffer-name))
-      (pop-to-buffer output-buffer-name)
-      ;; colorize output
-      (ansi-color-apply-on-region (point-min) (point-max))
-      ;; make read-only
-      (special-mode)
-      (when refresh-fn
+      (when is-special
+        (pop-to-buffer output-buffer-name)
+        ;; colorize output
+        (ansi-color-apply-on-region (point-min) (point-max))
+        ;; make read-only
+        (special-mode)
+        (when refresh-fn
         ;; install refresh command
         (use-local-map (copy-keymap special-mode-map))
         (local-set-key "g" (sdml-mode-cli--make-refresh-cmd command
                                                             load-path
                                                             output-buffer-name
-                                                            error-buffer-name))))))
+                                                            error-buffer-name)))))))
 
 (provide 'sdml-mode-cli)
 

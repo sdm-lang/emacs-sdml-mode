@@ -203,6 +203,10 @@ file in the repository for details.
 
 ## Changes
 
+### Version 0.2.0
+
+* Feature: update the grammar support for the underlying 0.4.0 release of tree-sitter-sdml.
+
 ### Version 0.1.9
 
 * Feature: added new `sdml-mode-ctags-mode` minor mode that provides a command to

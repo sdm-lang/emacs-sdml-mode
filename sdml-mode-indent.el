@@ -48,7 +48,9 @@
                    function_body
                    constant_def
                    informal_constraint
-                   constraint_sentence))
+                   constraint_sentence
+                   source_entity
+                   dimension_parent))
 
     ;; If parent node is one of this and current node is not first → indent
     (indent-rest . ())
@@ -58,8 +60,8 @@
                     import_statement
                     annotation_only_body
                     ;; entity_body << this double indents.
+                    dimension_body
                     enum_body
-                    property_body
                     structure_body
                     union_body
                     type_class_body

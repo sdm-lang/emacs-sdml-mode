@@ -49,6 +49,7 @@
     "assert"
     "class"
     "datatype"
+    "dimension"
     "entity"
     "enum"
     "event"
@@ -97,8 +98,12 @@
    (import_statement [ "[" "]" ] @punctuation.bracket)
 
    (member_import name: (qualified_identifier) @type)
+   (member_import "as" @keyword)
+   (member_import rename: (identifier) @type)
 
    (module_import name: (identifier) @module)
+   (module_import "as" @keyword)
+   (module_import rename: (identifier) @module)
 
    ;; -------------------------------------------------------------------
    ;; Annotations and Constraints (Note property => label)
@@ -126,8 +131,6 @@
 
    (function_parameter name: (identifier) @variable.parameter)
    (function_parameter target: (_) @type)
-
-   (optional) @operator
 
    (function_cardinality_expression (sequence_ordering) @keyword)
    (function_cardinality_expression (sequence_uniqueness) @keyword)
@@ -197,18 +200,21 @@
    (data_type_def base: (identifier_reference) @type)
    (data_type_def opaque: (opaque) @keyword)
 
+   (dimension_def name: (identifier) @type.definition)
+
    (entity_def name: (identifier) @type.definition)
 
    (enum_def name: (identifier) @type.definition)
 
-   (event_def "source" @keyword)
-   (event_def
-    name: (identifier) @type.definition
-    source: (identifier_reference) @type)
+   (event_def name: (identifier) @type.definition)
 
    (structure_def name: (identifier) @type.definition)
 
    (union_def name: (identifier) @type.definition)
+
+   (source_entity "source" @keyword entity: (identifier_reference) @type)
+   (source_entity "with" @keyword)
+   (source_entity member: (identifier) @variable.field)
 
    ;; -------------------------------------------------------------------
    ;; RDF Definitions
@@ -243,12 +249,18 @@
 
    (entity_identity "identity" @keyword)
 
-   (member_def name: (identifier) @variable.field)
-   (member_def target: (type_reference) @type)
+   (member_def
+    name: (identifier) @variable.field
+    target: (type_reference) @type)
 
    (property_ref
     "ref" @keyword
     property: (identifier_reference) @variable.field)
+
+   (dimension_parent
+    "parent" @keyword
+    name: (identifier) @variable.field
+    parent: (identifier_reference) @type)
 
    (value_variant name: (identifier) @constant)
 
