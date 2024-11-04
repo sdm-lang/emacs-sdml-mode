@@ -260,7 +260,7 @@
    (dimension_parent
     "parent" @keyword
     name: (identifier) @variable.field
-    parent: (identifier_reference) @type)
+    entity: (identifier_reference) @type)
 
    (value_variant name: (identifier) @constant)
 
