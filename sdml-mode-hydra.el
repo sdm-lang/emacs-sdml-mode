@@ -1,7 +1,7 @@
 
 (require 'sdml-mode)
 (require 'sdml-mode-ctags)
-(require 'pretty-hydra)
+(require 'pretty-hydra nil t)
 
 (cond
  ((featurep 'pretty-hydra)
