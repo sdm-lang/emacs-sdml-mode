@@ -45,8 +45,8 @@
   '(;; These nodes are always indented
     (indent-all . (member
                    entity_identity
+                   function_def
                    function_body
-                   constant_def
                    informal_constraint
                    constraint_sentence
                    source_entity
@@ -59,6 +59,7 @@
     (indent-body . (module_body
                     import_statement
                     annotation_only_body
+                    datatype_def_restriction
                     ;; entity_body << this double indents.
                     dimension_body
                     enum_body
@@ -93,7 +94,7 @@
     (multi-line-text . (quoted_string))
 
     ;; These nodes always outdent (1 shift in opposite direction)
-    (outdent . (constraint_environment_end))))
+    (outdent . (set_op_builder))))
 
 
 ;; --------------------------------------------------------------------------
