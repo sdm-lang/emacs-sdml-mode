@@ -187,12 +187,12 @@ or the keyword `"forall"` replaced with the Unicode `∀`.
 This package includes an [Eldev](https://github.com/emacs-eldev/eldev) file and the following MUST be run before
 creating any PR.
 
-- `eldev lint`
-- `eldev doctor`
-- `eldev package --load-before-compiling --stop-on-failure --warnings-as-errors`
-- `eldev test`
-- `eldev test --undercover auto,coveralls,merge,dontsent -U simplecov.json`
-- `eldev release -nU 9.9.9`
+* `eldev lint`
+* `eldev doctor`
+* `eldev package --load-before-compiling --stop-on-failure --warnings-as-errors`
+* `eldev test`
+* `eldev test --undercover auto,coveralls,merge,dontsent -U simplecov.json`
+* `eldev release -nU 9.9.9`
 
 The script [eldev-check.sh](https://gist.github.com/johnstonskj/6af5ef6866bfb1288f4962a6ba3ef418) may be useful to you if you do not have your own Eldev
 workflow.
@@ -203,6 +203,11 @@ This package is released under the Apache License, Version 2.0. See the LICENSE
 file in the repository for details.
 
 ## Changes
+
+### Version 0.2.1
+
+* Feature: update the grammar support for the underlying 0.4.8 release of
+  tree-sitter-sdml.
 
 ### Version 0.2.0
 

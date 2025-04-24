@@ -4,7 +4,7 @@
 
 ;;; License:
 
-;; Copyright (c) 2023, 2024 Simon Johnston
+;; Copyright (c) 2023, 2025 Simon Johnston
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -238,6 +238,12 @@
    (structure_def "structure" @keyword name: (identifier) @type.definition)
 
    (union_def "union" @keyword name: (identifier) @type.definition)
+   (from_definition_clause
+    "from" @keyword
+    from: (identifier_reference) @type
+    "with" @keyword)
+   (from_definition_clause wildcard: (_)  @type.builtin)
+   (from_definition_clause member: (identifier)  @variable)
 
    (source_entity "source" @keyword entity: (identifier_reference) @type)
    (source_entity "with" @keyword)

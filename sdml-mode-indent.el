@@ -4,7 +4,7 @@
 
 ;;; License:
 
-;; Copyright (c) 2023, 2024 Simon Johnston
+;; Copyright (c) 2023, 2025 Simon Johnston
 ;;
 ;; Licensed under the Apache License, Version 2.0 (the "License");
 ;; you may not use this file except in compliance with the License.
@@ -49,6 +49,7 @@
                    function_body
                    informal_constraint
                    constraint_sentence
+                   from_definition_clause
                    source_entity
                    dimension_parent))
 
@@ -67,6 +68,8 @@
                     union_body
                     type_class_body
                     function_body
+                    from_definition_clause
+                    source_entity
                     entity_identity
                     sequence_of_values
                     sequence_of_predicate_values

@@ -1,3 +1,28 @@
+;;; sdml-mode-hydra.el --- Hydra for SDML -*- lexical-binding: t; -*-
+
+;; Author: Simon Johnston <johnstonskj@gmail.com>
+
+;;; License:
+
+;; Copyright (c) 2025 Simon Johnston
+;;
+;; Licensed under the Apache License, Version 2.0 (the "License");
+;; you may not use this file except in compliance with the License.
+;; You may obtain a copy of the License at
+;;
+;;     http://www.apache.org/licenses/LICENSE-2.0
+;;
+;; Unless required by applicable law or agreed to in writing, software
+;; distributed under the License is distributed on an "AS IS" BASIS,
+;; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+;; See the License for the specific language governing permissions and
+;; limitations under the License.
+
+;;; Commentary:
+
+;; Definition of a Hydra interface for SDML actions.
+
+;;; Code:
 
 (require 'sdml-mode)
 (require 'sdml-mode-ctags)
@@ -29,9 +54,8 @@
      "Debug"
      (("h d"   tree-sitter-debug-mode                    "Toggle ts debug tree mode" :toggle t)
       ("h q"   tree-sitter-query-builder                 "Open ts query builder"))))
-  (bind-key "C-c C-s h" 'sdml-mode-hydra/body)
-  (bind-key "<f9> s" 'sdml-mode-hydra/body))
- 
+  (define-key sdml-mode-map (kbd "C-c C-s h") 'sdml-mode-hydra/body)
+  (define-key sdml-mode-map (kbd "f9 s") 'sdml-mode-hydra/body))
 
  ;;    ((featurep 'hydra) (message "plain")
  ;;     (defhydra sdml-mode-hydra (:color pink :hint nil)
@@ -53,3 +77,7 @@
  ;;       ("q" tree-sitter-query-builder)))
  (t
   (message "Install 'hydra or 'pretty-hydra")))
+
+(provide 'sdml-mode-hydra)
+
+;;; sdml-mode-hydra.el ends here
