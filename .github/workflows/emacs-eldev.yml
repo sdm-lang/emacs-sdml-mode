@@ -29,7 +29,7 @@ jobs:
       uses: emacs-eldev/setup-eldev@v1
 
     - name: Check out the source code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v5
 
     - name: Ensure that copyright notices are up-to-date
       run: ${ELDEV} ${ELDEV_ARGS} doctor up-to-date-copyright --all-tests
