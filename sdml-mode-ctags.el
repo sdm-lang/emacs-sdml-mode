@@ -44,15 +44,15 @@
 ;; --------------------------------------------------------------------------
 
 (defcustom sdml-mode-ctags-command "/opt/homebrew/bin/ctags"
-  "The command path/name for Universal Ctags."
-  :tag "U-Ctags command path"
+  "The command path/name for universal Ctags."
+  :tag "Universal Ctags command path"
   :type 'file
   :group 'sdml)
 
 
 (defcustom sdml-mode-ctags-output-file-name "tags"
   "The name of the generated tag file."
-  :tag "ctags output file name"
+  :tag "Ctags output file name"
   :type 'file
   :group 'sdml)
 

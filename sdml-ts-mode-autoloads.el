@@ -24,6 +24,8 @@ This major mode will, by default, enable the following minor modes:
 - `abbrev-mode'
 - `prettify-symbols-mode' (see `sdml-mode-prettify-symbols-alist')
 - `tree-sitter-mode'
+- `sdml-mode-hl-mode'
+- `sdml-mode-indent-mode'
 - `sdml-mode-ctags-mode'
 
   Key bindings:
@@ -126,7 +128,7 @@ This major mode will, by default, enable the following minor modes:
 
 - `abbrev-mode'
 - `prettify-symbols-mode' (see `sdml-ts-mode-prettify-symbols-alist')
-- `tree-sitter-mode'
+- `treesit-mode'
 - `sdml-ts-mode-ctags-mode'
 
   Key bindings:
@@ -203,6 +205,17 @@ This major mode will, by default, enable the following minor modes:
 (fn)" t)
 (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-mode))
 (register-definition-prefixes "flycheck_sdml-mode" '("sdml-mode-"))
+
+
+;;; Generated autoloads from flycheck_sdml-ts-mode-fold.el
+
+(register-definition-prefixes "flycheck_sdml-ts-mode-fold" '("sdml-ts-mode-fold-rule-set"))
+
+
+;;; Generated autoloads from sdml-ts-mode-fold.el
+
+(register-definition-prefixes "sdml-ts-mode-fold" '("sdml-ts-mode-fold-rule-set"))
+
 
 ;;; End of scraped data
 

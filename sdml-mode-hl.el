@@ -74,8 +74,9 @@
    (module_path_root_only "::" @punctuation.separator)
    (module_path_relative "::" @punctuation.separator)
    (module_path_relative segment: (identifier) @module.special)
-   (module_path_absolute "::" @punctuation.separator
-                         segment: (identifier) @module.special)
+   (module_path_absolute
+    "::" @punctuation.separator
+    segment: (identifier) @module.special)
 
    (import_statement "import" @keyword)
    (import_statement [ "[" "]" ] @punctuation.bracket)
@@ -90,9 +91,7 @@
    ;; Annotations and Constraints (Note property => label)
    ;; -------------------------------------------------------------------
 
-   (annotation_property
-    "@" @label
-    name: (identifier_reference) @label)
+   (annotation_property "@" @label name: (identifier_reference) @label)
 
    (annotation_property value: (value (identifier_reference) @type))
 
@@ -103,8 +102,7 @@
 
    (constraint_environment "with" @keyword)
 
-   (function_def
-    (function_signature name: (identifier) @function.definition))
+   (function_def (function_signature name: (identifier) @function.definition))
 
    (function_signature "def" @keyword)
    (function_signature target: (_) @type)
@@ -113,23 +111,22 @@
    (function_parameter name: (identifier) @variable.parameter)
    (function_parameter target: (_) @type)
 
-   (function_cardinality_expression (sequence_ordering) @keyword)
-   (function_cardinality_expression (sequence_uniqueness) @keyword)
-   (function_cardinality_expression [ "{" "}" ] @punctuation.bracket)
+   (cardinality_reference_expression (sequence_ordering) @keyword)
+   (cardinality_reference_expression (sequence_uniqueness) @keyword)
+   (cardinality_reference_expression [ "{" "}" ] @punctuation.bracket)
 
-   (function_body (function_op_by_definition) @operator)
+   (function_body [ ":=" "≔" ] @operator)
 
    (function_composition subject: (reserved_self) @variable.builtin)
    (function_composition name: (identifier) @function.call)
-   (function_composition [ "·" "." ] @operator)
+   (function_composition [ "." ] @operator)
 
    (constraint_sentence [ "(" ")" ] @punctuation.bracket)
 
    (atomic_sentence
     predicate: (term (identifier_reference) @function.call))
-
-   (actual_arguments [ "(" ")" ] @punctuation.bracket)
-   (actual_arguments
+   (atomic_sentence [ "(" ")" ] @punctuation.bracket)
+   (atomic_sentence
     argument: (term (identifier_reference (identifier) @variable)))
 
    (term (reserved_self) @variable.builtin)
@@ -141,12 +138,17 @@
    (quantified_sentence "," @punctuation.separator)
 
    (variable (identifier) @variable)
+   (variable range: (identifier_reference) @type)
 
    (functional_term
     function: (term (identifier_reference) @function.call))
+   (functional_term [ "(" ")" ] @punctuation.bracket)
+   (functional_term
+    argument: (term (identifier_reference (identifier) @variable)))
 
-   (sequence_builder [ "{" "}" ] @punctuation.bracket
-                     (set_op_builder) @punctuation.separator)
+   (sequence_builder
+    [ "{" "}" ] @punctuation.bracket
+    (set_op_builder) @punctuation.separator)
 
    (sequence_of_predicate_values [ "{" "}" ] @punctuation.bracket)
    (sequence_of_predicate_values (sequence_ordering) @keyword)
@@ -180,6 +182,34 @@
     [ (set_op_membership "∈" @operator)
       (set_op_membership "in" @keyword) ])
 
+   (set_expression_sentence
+    [ (set_op_union "∪" @operator)
+      (set_op_union "union" @keyword)
+      (set_op_intersection "∩" @operator)
+      (set_op_intersection "intersection" @keyword)
+      (set_op_complement "∖" @operator)
+      (set_op_complement "complement" @keyword)
+      (set_op_subset "⊂" @operator)
+      (set_op_subset "subset" @keyword)
+      (set_op_subset_or_equal "⊆" @operator)
+      (set_op_subset_or_equal "subseteq" @keyword)
+      (set_op_supset "⊃" @operator)
+      (set_op_supset "supset" @keyword)
+      (set_op_supset_or_equal "⊇" @operator)
+      (set_op_supset_or_equal "supseteq" @keyword)
+      (set_op_product "⨉" @operator)
+      (set_op_product "product" @keyword)
+      (set_op_membership "∈" @operator)
+      (set_op_membership "in" @keyword) ])
+
+   (arithmetic_expression_sentence
+    [ (math_op_multiply [ "*" "✕" ] @operator)
+      (math_op_divide [ "/" "÷" ] @operator)
+      (math_op_modulo "mod" @keyword)
+      (math_op_modulo "%" @operator)
+      (math_op_add "+" @operator)
+      (math_op_subtract "-" @operator) ])
+
    ;; -------------------------------------------------------------------
    ;; Types
    ;; -------------------------------------------------------------------
@@ -198,32 +228,25 @@
 
    (datatype_def_restriction [ "{" "}" ] @punctuation.bracket)
    (length_restriction_facet
-    [ "length"
-      "maxLength"
-      "minLength" ] @property
+    [ "length" "maxLength" "minLength" ] @property
     "=" @operator)
    (digit_restriction_facet
-    [ "fractionDigits"
-      "totalDigits" ] @property
+    [ "fractionDigits" "totalDigits" ] @property
     "=" @operator)
    (value_restriction_facet
-    [ "maxExclusive"
-      "maxInclusive"
-      "minExclusive"
-      "minInclusive" ] @property
+    [ "maxExclusive" "maxInclusive" "minExclusive" "minInclusive" ] @property
     "=" @operator)
    (tz_restriction_facet
     "explicitTimezone" @property
-    "=" @operator)
-   (pattern_restriction_facet [ "[" "]" ] @punctuation.bracket)
+    "=" @operator
+    (tz_restriction_value) @keyword)
    (pattern_restriction_facet
     "pattern" @property
     "=" @operator
     (quoted_string) @string)
+   (pattern_restriction_facet [ "[" "]" ] @punctuation.bracket)
 
    (kw_is_fixed) @keyword
-
-   (tz_restriction_value) @keyword
 
    (dimension_def "dimension" @keyword name: (identifier) @type.definition)
 
@@ -238,12 +261,17 @@
    (structure_def "structure" @keyword name: (identifier) @type.definition)
 
    (union_def "union" @keyword name: (identifier) @type.definition)
-   (from_definition_clause
-    "from" @keyword
-    from: (identifier_reference) @type
-    "with" @keyword)
-   (from_definition_clause wildcard: (_)  @type.builtin)
-   (from_definition_clause member: (identifier)  @variable)
+
+   (from_definition_clause "from" @keyword from: (identifier_reference) @type)
+
+   (from_definition_with "with" @keyword)
+   (from_definition_with wildcard: (_)  @type.builtin)
+   (from_definition_with member: (identifier)  @variable)
+   (from_definition_with [ "[" "]" ] @punctuation.bracket)
+
+   (from_definition_without "without" @keyword)
+   (from_definition_without member: (identifier)  @variable)
+   (from_definition_without [ "[" "]" ] @punctuation.bracket)
 
    (source_entity "source" @keyword entity: (identifier_reference) @type)
    (source_entity "with" @keyword)
@@ -265,12 +293,13 @@
    (type_class_def "class" @keyword name: (identifier) @type.definition)
    (type_class_def [ "(" ")" ] @punctuation.bracket)
 
-   (type_variable name: (identifier) @type)
-   (type_variable (type_op_combiner) @operator)
+   (type_parameter name: (identifier) @type.definition)
+   (type_parameter (type_op_combiner) @operator)
 
-   (type_class_reference name: (identifier_reference) @type)
+   (type_parameter_restriction class: (identifier_reference) @type)
+   (type_parameter_restriction [ "(" ")" ] @punctuation.bracket)
 
-   (type_class_arguments [ "(" ")" ] @punctuation.bracket)
+   ;;(type_restriction_argument (identifier) @type.definition)
 
    (method_def
     (function_signature name: (identifier) @method.definition))
@@ -312,9 +341,9 @@
    (string (quoted_string) @string)
    (string language: (language_tag) @property)
 
-   (iri) @string.special
-
-   (binary) @string.special
+   [
+    (binary)
+    (iri) ] @string.special
 
    [
     (rational)
