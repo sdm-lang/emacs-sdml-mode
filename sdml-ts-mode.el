@@ -2,7 +2,7 @@
 
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.1.0
-;; Package-Requires: ((emacs "29.1") (treesit-fold "0.2.1"))
+;; Package-Requires: ((emacs "29.1") (treesit-fold "0.2.1") (treesit-ispell "0.1.0"))
 ;; URL: https://github.com/johnstonskj/emacs-sdml-mode
 ;; Keywords: languages tools
 
@@ -119,28 +119,37 @@
 ;; `treesit-fold-indicators-mode' in all SDML buffers.
 ;;
 
+;; Other
+;;
+
+;; `treesit-font-lock-level'
+;; `treesit-inspect-mode'
+;; `treesit-explore-mode'
+
 ;;; Code:
 
 (eval-when-compile
   (require 'rx))
 (require 'treesit)
+(require 'treesit-fold)
+(require 'treesit-ispell)
 (require 'ansi-color)
 (require 'compile)
+
+(declare-function json-mode "json")
+
+
+(makunbound 'sdml-ts-mode--debug-mode)
+(defvar sdml-ts-mode--debug-mode t)
+
+;; (defvar sdml-ts-mode--debug-mode
+;;   (let ((debug-mode (getenv "DEBUG_SDML_TS_MODE")))
+;;     (and debug-mode (string-equal debug-mode "1"))))
 
 (require 'sdml-ts-mode-abbrev)
 
 ;(require 'sdml-mode-cli)
 ;(require 'sdml-mode-ctags)
-
-(declare-function json-mode "json")
-
-(unless (assoc 'sdml treesit-language-source-alist)
-  (add-to-list 'treesit-language-source-alist
-               '(sdml . ("https://github.com/sdm-lang/tree-sitter-sdml"))))
-
-(defvar sdml-ts-mode--debug-mode
-  (let ((debug-mode (getenv "DEBUG_SDML_TS_MODE")))
-    (and debug-mode (string-equal debug-mode "1"))))
 
 ;; --------------------------------------------------------------------------
 ;; Customization
@@ -153,7 +162,9 @@
   :group 'languages)
 
 (defcustom sdml-ts-mode-prettify-symbols-alist
-  '(("->" . ?→) ("<-" . ?←) ("forall" ?∀) ("exists" ?∃) ("in" ?∈) (":=" ?≔))
+  '(("->" . ?→) ("<-" . ?←) ("forall" . ?∀) ("exists". ?∃) ("in". ?∈) (":=". ?≔)
+    ("and" . ?∧) ("or" . ?∨) ("xor" . ?⊻) ("not" . ?¬) ("implies" . ?⟹) ("iff" . ?⇔)
+    ("complement" . ?∖) ("intersects" . ?∩) ("union" . ?∪))
   "An alist of symbol replacements used for `prettify-symbols-alist'."
   :tag "Symbol mapping for prettify"
   :type '(repeat (cons string character))
@@ -378,15 +389,29 @@ using the key `q', and it's content may be refreshed with the key
 ;; Key Bindings
 ;; --------------------------------------------------------------------------
 
-(defvar sdml-ts-mode-map
-  (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "C-c C-s v") 'sdml-ts-mode-validate-current-buffer)
-    (define-key map (kbd "C-c C-s M-v") 'sdml-ts-mode-validate-file)
-    (define-key map (kbd "C-c C-s t") 'sdml-ts-mode-current-buffer-dependency-tree)
-    (define-key map (kbd "C-c C-s M-t") 'sdml-ts-mode-current-buffer-dependency-graph)
-    map)
-  "Keymap for SDML major mode.")
+(defvar sdml-ts-mode-map-prefix "C-c")
 
+(defun sdml-ts-mode--prefix-key (key-seq)
+  "Return KEY-SEQ concatenated with the mode's prefix key."
+  (format "%s %s" sdml-ts-mode-map-prefix key-seq))
+
+(defvar-keymap sdml-ts-mode-map
+  :doc "Keymap for SDML with tree-sitter."
+  :parent prog-mode-map
+
+  ;; SDML CLI tooling...
+  (sdml-ts-mode--prefix-key "v") #'sdml-ts-mode-validate-current-buffer
+  (sdml-ts-mode--prefix-key "C-v") #'sdml-ts-mode-validate-current-buffer
+  (sdml-ts-mode--prefix-key "d t") #'sdml-ts-mode-current-buffer-dependency-tree
+  (sdml-ts-mode--prefix-key "d g") #'sdml-ts-mode-current-buffer-dependency-graph
+
+  ;; Code folding
+  (sdml-ts-mode--prefix-key "-") #'treesit-fold-close
+  (sdml-ts-mode--prefix-key "+") #'treesit-fold-open
+  (sdml-ts-mode--prefix-key "*") #'treesit-fold-open-recursively
+  (sdml-ts-mode--prefix-key "=") #'treesit-fold-toggle
+  (sdml-ts-mode--prefix-key "C--") #'treesit-fold-close-all
+  (sdml-ts-mode--prefix-key "C-+") #'treesit-fold-open-all)
 
 ;; --------------------------------------------------------------------------
 ;; Syntax Table
@@ -394,8 +419,63 @@ using the key `q', and it's content may be refreshed with the key
 
 (defvar sdml-ts-mode-syntax-table
   (let ((table (make-syntax-table)))
-    (modify-syntax-entry ?- ". 12b" table)
+    ;; Comments
+    (modify-syntax-entry ?\; "<   " table)
+    (modify-syntax-entry ?\n ">   " table)
+    (modify-syntax-entry ?\^m ">   " table)
+    ;; Symbols
+    (modify-syntax-entry ?_ "_   " table)
+    (modify-syntax-entry ?@ "_   " table)
+    ;; Operators (as punctuation)
+    (mapcar (lambda (c)
+              (modify-syntax-entry c ".   " table))
+            '(?≔ ?= ?≠ ?< ?> ?≤ ?≥
+                 ?+ ?- ?/ ?* ?× ?÷ ?%
+                 ?∧ ?∨ ?⊻ ?¬?⟹ ?⇔ ?∃ ?∄ ?∀
+                 ?∋ ?∌ ?∩ ?∪ ?∖ ?⊂ ?⊆ ?⊃ ?⊇ ?⨉
+                 ?→ ?← ?∘
+                 ?⊤ ?⊥ ?∅))
+    ;; Non-operator punctuation
+    (modify-syntax-entry ?# ".   " table)
+    (modify-syntax-entry ?, ".   " table)
+    (modify-syntax-entry ?: ".   " table)
+    (modify-syntax-entry ?| ".   " table)
+    ;; Escape characters
+    (modify-syntax-entry ?\ "\\   " table)
+    ;; Expression prefix characters
+    (modify-syntax-entry ?# "'   " table)
+    ;; Parenthesis
+    (modify-syntax-entry ?\( "()  " table)
+    (modify-syntax-entry ?\) ")(  " table)
+    (modify-syntax-entry ?\[ "(]" table)
+    (modify-syntax-entry ?\] ")[" table)
+    (modify-syntax-entry ?\{ "(}" table)
+    (modify-syntax-entry ?\} "){}" table)
     table))
+
+;; --------------------------------------------------------------------------
+;; Navigation Definition
+;; --------------------------------------------------------------------------
+
+(defconst sdml-ts-mode--definition-node-names
+  (regexp-opt '("datatype_def"
+                "entity_def"
+                "enum_def"
+                "event_def"
+                "metric_def"
+                "metric_group_def"
+                "rdf_def"
+                "structure_def"
+                "type_class_def"
+                "union_def")))
+
+(defun sdml-ts-mode--defun-name (node)
+  "For any SDML definition in NODE, return it's name as a string.
+Return nil if there is no name or if NODE is not a defun node."
+  (when (string-match sdml-ts-mode--definition-node-names
+                      (treesit-node-type node))
+    (treesit-node-text
+     (treesit-node-child-by-field-name node "name") t)))
 
 ;; --------------------------------------------------------------------------
 ;; Mode Definition
@@ -405,8 +485,12 @@ using the key `q', and it's content may be refreshed with the key
 (define-derived-mode
   sdml-ts-mode
   prog-mode
-  "SDML-ts"
+  "SDML"
   "A major mode for editing SDML (Simple Domain Modeling Language) files.
+
+Key bindings:
+
+\\{sdml-ts-mode-map}
 
 This major mode will, by default, enable the following minor modes:
 
@@ -415,9 +499,7 @@ This major mode will, by default, enable the following minor modes:
 - `treesit-mode'
 - `treesit-fold-mode'
 - `treesit-fold-indicators-mode'
-
-  Key bindings:
-  \\{sdml-ts-mode-map}"
+- `treesit-fold-line-comment-mode'"
 
   :group 'sdml
 
@@ -425,7 +507,17 @@ This major mode will, by default, enable the following minor modes:
 
   :abbrev-table sdml-ts-mode-abbrev-table
 
-  (setq-local comment-start-skip ";+")
+  (setq-local prettify-symbols-alist sdml-ts-mode-prettify-symbols-alist)
+
+  (setq-local words-include-escapes nil)
+
+  (setq-local comment-start ";")
+  (setq-local comment-end "")
+  (setq-local comment-start-skip (rx ";" (* (syntax whitespace))))
+
+  (add-to-list
+   'treesit-ispell-grammar-text-mapping
+   '(sdml . (quoted_string line_comment)))
 
   (when (treesit-ready-p 'sdml)
     (message "Setting up tree-sitter for SDML")
@@ -433,6 +525,9 @@ This major mode will, by default, enable the following minor modes:
 
     (require 'sdml-ts-mode-imenu)
     (sdml-ts-mode-imenu-setup)
+
+    (setq-local treesit-defun-type-regexp sdml-ts-mode--definition-node-names)
+    (setq-local treesit-defun-name-function #'sdml-ts-mode--defun-name)
 
     (require 'sdml-ts-mode-font-lock)
     (sdml-ts-mode-font-lock-setup)
@@ -446,7 +541,13 @@ This major mode will, by default, enable the following minor modes:
     (treesit-major-mode-setup)))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-ts-mode))
+(when (treesit-available-p)
+
+  (unless (assoc 'sdml treesit-language-source-alist)
+    (add-to-list 'treesit-language-source-alist
+                 '(sdml . ("https://github.com/sdm-lang/tree-sitter-sdml"))))
+
+  (add-to-list 'auto-mode-alist '("\\.sdml?\\'" . sdml-ts-mode)))
 
 (provide 'sdml-ts-mode)
 

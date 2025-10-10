@@ -135,6 +135,9 @@
 ;; Abbrev ❱ Table
 ;; --------------------------------------------------------------------------
 
+(when sdml-ts-mode--debug-mode
+  (makunbound 'sdml-ts-mode-abbrev-table))
+
 ;; Note you still need a replacement string "" when using
 ;;      skeletons or the original text isn't removed.
 (define-abbrev-table 'sdml-ts-mode-abbrev-table

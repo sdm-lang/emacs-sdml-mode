@@ -70,6 +70,7 @@ It is safe to ignore OFFSET."
     (constraint_environment . treesit-fold-range-seq)
     (function_body . treesit-fold-range-seq)
     (function_signature . sdml-ts-mode--fold-parameters)
+    (metric_function_signature . sdml-ts-mode--fold-parameters)
     (formal_constraint . sdml-ts-mode--fold-formal-constraint-body)
     (atomic_sentence . sdml-ts-mode--fold-parameters)
     (functional_term . sdml-ts-mode--fold-parameters)
@@ -83,12 +84,13 @@ It is safe to ignore OFFSET."
     (from_definition_with . sdml-ts-mode--fold-sequence)
     (from_definition_without . sdml-ts-mode--fold-sequence)
     (annotation_only_body . treesit-fold-range-seq)
-    (datatype_def_restriction . treesit-fold-range-seq)
+    (datatype_type_restrictions . treesit-fold-range-seq)
     (dimension_body . treesit-fold-range-seq)
     (entity_body . treesit-fold-range-seq)
     (source_entity . sdml-ts-mode--fold-sequence)
     (enum_body . treesit-fold-range-seq)
     (event_body . treesit-fold-range-seq)
+    (metric_group_body . treesit-fold-range-seq)
     (rdf_def . sdml-ts-mode--fold-sequence)
     (structure_body . treesit-fold-range-seq)
     (type_class_def . sdml-ts-mode--fold-parameters)
@@ -102,6 +104,7 @@ It is safe to ignore OFFSET."
 ;;;###autoload
 (defun sdml-ts-mode-fold-setup ()
   "Setup `treesit-fold-mode' and add mode hooks."
+  (message "Setting up tree-sitter/fold for SDML")
   (when sdml-ts-mode--debug-mode
     (setq treesit-fold-range-alist
           (assq-delete-all 'sdml-ts-mode treesit-fold-range-alist)))
@@ -109,8 +112,9 @@ It is safe to ignore OFFSET."
   ;; install rules into treesit-fold
   (add-to-list
    'treesit-fold-range-alist
-   `(sdml-ts-mode . ,sdml-ts-mode--fold-rule-set))
+   `(sdml-ts-mode . ,sdml-ts-mode-fold--rule-set))
 
+  ;; add mode hooks by default
   (when sdml-ts-mode-enable-folding
     (add-hook 'sdml-ts-mode-hook 'treesit-fold-mode)
     (add-hook 'sdml-ts-mode-hook 'treesit-fold-indicators-mode)
