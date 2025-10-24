@@ -1,0 +1,3 @@
+[tools]
+npm = "latest"
+"npm:emacs-eask/cli" = "0.11.8"

@@ -3,7 +3,7 @@
 ;; Author: Simon Johnston <johnstonskj@gmail.com>
 ;; Version: 0.2.1
 ;; Package-Requires: ((emacs "28.1") (tree-sitter "0.18.0") (tree-sitter-indent "0.4"))
-;; URL: https://github.com/johnstonskj/emacs-sdml-mode
+;; URL: https://github.com/sdm-lang/emacs-sdml-mode
 ;; Keywords: languages tools
 
 ;;; License:
