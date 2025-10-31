@@ -5,6 +5,8 @@
 This package provides an Emacs tree-sitter based major mode for SDML - the
 [Simple Domain Modeling Language](https://github.com/sdm-lang/tree-sitter-sdml).
 
+[![License-Apache_2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License-MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![MELPA](https://melpa.org/packages/sdml-mode-badge.svg)](https://melpa.org/#/sdml-mode)
 
 ## Installing
